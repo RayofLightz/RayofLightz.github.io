@@ -30,3 +30,13 @@ html, body {
   text-align: center;
   max-width: 500px;
 }
+.large-text{
+  font-family: 'Nixe One', cursive;
+  font-size: 500%;
+  color: rgb(82,91,89);
+}
+.small-text{
+  font-family: 'Nixe One',cursive;
+  font-size: 300%;
+  color: rgba(82,91,89,0.90);
+}
