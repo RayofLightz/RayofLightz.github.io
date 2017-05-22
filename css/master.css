@@ -33,7 +33,8 @@ html, body {
 .content .large-text{
   font-family: 'Nixe One', cursive;
   font-size: 500%;
-  color: rgb(82,91,89);
+  color: rgb(37,72,68);
+  text-shadow: 8px;
 }
 .content .small-text{
   font-family: 'Nixe One',cursive;
