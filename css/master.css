@@ -36,9 +36,11 @@ html, body {
   font-size: 500%;
   color: rgba(232,232,232,0.9);
   text-shadow: 8px rgba(232,232,232,0.90);
+  z-index:3;
 }
 .content .small-text{
   font-family: 'Oswald',cursive;
   font-size: 300%;
   color: rgba(232,232,232,0.9);
+  z-index: 3;
 }
