@@ -63,3 +63,30 @@ html, body {
   font-size: 150%;
   color: #cdcccb;
 }
+
+.footer{
+  width: 100%;
+  height: 28%;
+  background: -webkit-linear-gradient(left top, rgb(253,246,149),rgb(176,93,10));
+  z-index: 2;
+  display: table;
+  background-size: cover;
+}
+.footer .footer-content{
+  display: inline-table;
+  margin-left: 10px;
+}
+.image{
+  align-content: center;
+  background-color: rgb(8,3,1);
+}
+.text{
+  color: #cdcccb;
+  font-size: 75%;
+  margin-left: 10%;
+}
+#bottom{
+  max-width: 90%;
+  max-height: 90%;
+
+}
