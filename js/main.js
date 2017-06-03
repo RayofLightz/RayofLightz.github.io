@@ -15,6 +15,6 @@ function make_it_rain(){
 
   }
 }
-$("document").ready(function(){
+$(document).ready(function(){
   make_it_rain();
 });
