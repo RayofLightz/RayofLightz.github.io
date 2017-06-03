@@ -44,7 +44,7 @@ html, body {
   color: rgba(232,232,232,0.9);
   z-index: 3;
 }
-.middle{
+.rain{
   background-color: #080301;
   background-size: cover;
   display:table;
@@ -89,4 +89,16 @@ html, body {
   max-width: 90%;
   max-height: 90%;
 
+}
+.rain_drop{
+  background-color: blue;
+  width: 1px;
+  height: 89px;
+  position: absolute;
+  bottom: 200px;
+  -webkit-animation: fall .63s linear infinite;
+  z-index: 1;
+}
+@-webkit-keyframes fall{
+  to {margin-top:900px;}
 }
