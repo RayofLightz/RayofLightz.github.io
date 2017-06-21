@@ -78,12 +78,16 @@ html, body {
 }
 .image{
   align-content: center;
+  display: table-cell;
   background-color: rgb(8,3,1);
 }
 .text{
-  color: #cdcccb;
-  font-size: 75%;
+  color: #00000000;
+  font-size: 150%;
   margin-left: 10%;
+  display: table-cell;
+  padding-left: 60;
+  padding-right: 0;
 }
 #bottom{
   max-width: 90%;
