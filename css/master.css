@@ -75,14 +75,17 @@ html, body {
 .footer .footer-content{
   display: inline-table;
   margin-left: 10px;
+  margin-top: 10px;
 }
 .image{
   align-content: center;
   display: table-cell;
   background-color: rgb(8,3,1);
+  max-width: 180px;
+  margin-top: 10px;
+
 }
 .text{
-  color: #00000000;
   font-size: 150%;
   margin-left: 10%;
   display: table-cell;
@@ -90,8 +93,10 @@ html, body {
   padding-right: 0;
 }
 #bottom{
-  max-width: 90%;
-  max-height: 90%;
+  max-width: 80%;
+  max-height: 100%;
+  margin-left: 15;
+  margin-top: 6px;
 
 }
 .rain_drop{
