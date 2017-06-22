@@ -113,9 +113,10 @@ html, body {
   max-width: 100%;
   width: 100%;
   display: table-row;
-  background-color: rgba(8,3,1,0.69);
+  background-color: rgb(8,3,1);
   padding: 0;
 }
+.junk{display: none;}
 @-webkit-keyframes fall{
   to {margin-top:900px;}
 }
