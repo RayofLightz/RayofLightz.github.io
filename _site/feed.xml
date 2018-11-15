@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-11-15T12:52:51-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Basic shellcoding for linux on x86</title><link href="http://localhost:4000/shellcoding/linux/x86/2018/10/23/Shellcoding-for-linux-on-x86.html" rel="alternate" type="text/html" title="Basic shellcoding for linux on x86" /><published>2018-10-23T00:00:00-04:00</published><updated>2018-10-23T00:00:00-04:00</updated><id>http://localhost:4000/shellcoding/linux/x86/2018/10/23/Shellcoding-for-linux-on-x86</id><content type="html" xml:base="http://localhost:4000/shellcoding/linux/x86/2018/10/23/Shellcoding-for-linux-on-x86.html">&lt;h3 id=&quot;beginning&quot;&gt;Beginning&lt;/h3&gt;
+&lt;p&gt;Writing shellcode is an excellent way to learn more about assembly language and how a program communicates with
+the underlying OS. Put simply shellcode is code that is injected into a running program to make it do something
+it was not made to do. Normally this is to spawn a shell, but any code made to run after a bug in a program is
+exploited counts as shellcode.&lt;/p&gt;
+
+&lt;p&gt;Before you begin writing shellcode it is a good idea to read a few tutorials on writing assembly programs.
+A good reference would be &lt;a href=&quot;https://www.tutorialspoint.com/assembly_programming/&quot;&gt;tutorial points&lt;/a&gt;. To compile the assembly code for this tutorial I used nasm. To make the process of compiling the shellcode and extracting the op codes easier I have included a makefile to
+aid in the process.&lt;/p&gt;
+
+&lt;h3 id=&quot;hello-world&quot;&gt;Hello world&lt;/h3&gt;
+&lt;p&gt;Lets begin with a shellcode that prints out to the screen hello world.
+Here is the end shellcode. Save it in a file named &lt;code class=&quot;highlighter-rouge&quot;&gt;shellcode.asm&lt;/code&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-assembly&quot; data-lang=&quot;assembly&quot;&gt;section .text
+    global _start
+
+_start:
+    xor eax, eax
+    push eax
+    push 0x0A646c72 ; hello world
+    push 0x6f77206f
+    push 0x6c6c6548
+    mov bl, 0x1 ; stdout
+    mov ecx, esp ; the address of hello world
+    mov dl, 0xe ; the length of hello world
+    mov al, 0x4  ; sys_write syscall
+    int 0x80 ; call the syscall
+    mov al, 0x1 ; sys_exit syscall
+    int 0x80 ; call the syscall&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The make file is as follows&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-make&quot; data-lang=&quot;make&quot;&gt;&lt;span class=&quot;nl&quot;&gt;all&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;shellcode&lt;/span&gt;
+
+&lt;span class=&quot;nl&quot;&gt;shellcode.o&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;shellcode.asm&lt;/span&gt;
+	nasm &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; elf shellcode.asm
+
+&lt;span class=&quot;nl&quot;&gt;shellcode&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;shellcode.o&lt;/span&gt;
+	ld &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; elf_i386 &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; shellcode shellcode.o
+
+&lt;span class=&quot;nl&quot;&gt;.PHONY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;clean&lt;/span&gt;
+&lt;span class=&quot;nl&quot;&gt;clean&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+	rm shellcode.o
+	rm shellcode
+&lt;span class=&quot;nl&quot;&gt;.PHONY&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;raw&lt;/span&gt;
+&lt;span class=&quot;nl&quot;&gt;raw&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'\\x'&lt;/span&gt;
+	&lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'\\x'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; objdump &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; shellcode | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;^ &quot;&lt;/span&gt; | cut &lt;span class=&quot;nt&quot;&gt;-f2&lt;/span&gt; | tr &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt; | tr &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'\n'&lt;/span&gt; | sed &lt;span class=&quot;s1&quot;&gt;'s/.\{2\}/&amp;amp;\\x /g'&lt;/span&gt;| head &lt;span class=&quot;nt&quot;&gt;-c-3&lt;/span&gt; | tr &lt;span class=&quot;nt&quot;&gt;-d&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;' '&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To compile this shellcode run &lt;code class=&quot;highlighter-rouge&quot;&gt;make all&lt;/code&gt; then run &lt;code class=&quot;highlighter-rouge&quot;&gt;./shellcode&lt;/code&gt;. You should see Hello world outputted to the screen.
+This is a shellcode that writes hello world. We start out by XORing eax to zero out the register. We then push eax onto the stack as a null byte. Then we push hello
+world onto the stack. Hello world is pushed onto the stack in reverse because x86 is little endian. Next comes the part that makes the shellcode a little more involved.
+When we move hex 0x1 into what would normally be the ebx we instead use bl. We are using the 8 bit register portion of ebx so we do not have null bytes in our shellcode.
+Why wouldn’t we want null bytes in our shellcode? The reason, put simply, is functions like &lt;code class=&quot;highlighter-rouge&quot;&gt;strncpy()&lt;/code&gt; will stop copping a string when they reach a nullbyte. This would result in our shellcode being cut off and not being executed
+correctly. We then copy the address of hello world into ecx and the length of our shellcode into dl. After this we move 0x4 into al. This sets the syscall we are using to the write syscall. We then use int 0x80 which tells the
+kernel to call our syscall. After this we set al to 0x1(The exit syscall) which we then use int 0x80 again to tell the kernel we want this process to be “exited”. If you are confused don’t worry I will explain in the upcoming
+section.&lt;/p&gt;
+
+&lt;h3 id=&quot;syscalls-op-codes-and-registers-oh-my-featuring-the-stack&quot;&gt;Syscalls, op-codes, and registers. Oh my (featuring the stack)&lt;/h3&gt;
+&lt;h2 id=&quot;syscalls&quot;&gt;Syscalls&lt;/h2&gt;
+&lt;p&gt;In the explanation of the hello world shellcode above you may have been wondering what a syscall is. A syscall is a way for a process to communicate with the underlying operating system. This makes it easier for programmers to say
+write to a file or change the permissions of a file. Instead of having to spend time implementing their own solution programmers were able to relay on the operating system to handle certain tasks. Syscalls are called in x86 assembly by setting the eax register to the syscall number. The syscall number is just a number that is associated with a certain syscall. For example the syscall &lt;code class=&quot;highlighter-rouge&quot;&gt;sys_exit&lt;/code&gt; has the hex value of 0x1.
+Syscalls are used in shellcode because the process dose not have to find and load in a shared object or have statically linked code to obtain functionality outside of the program. Syscalls are always there for our shellcode to call. In the hello world shellcode
+I use two syscalls of interest &lt;code class=&quot;highlighter-rouge&quot;&gt;sys_write&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;sys_exit&lt;/code&gt;. &lt;code class=&quot;highlighter-rouge&quot;&gt;sys_write&lt;/code&gt; writes a string to a file descriptor(in our case 1 for stdout) and &lt;code class=&quot;highlighter-rouge&quot;&gt;sys_exit&lt;/code&gt; simply “exits” the program like &lt;code class=&quot;highlighter-rouge&quot;&gt;exit();&lt;/code&gt; in c.
+A great reference for syscalls on linux and their corresponding numbers can be found &lt;a href=&quot;https://syscalls.kernelgrok.com/&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;opcodes&quot;&gt;Opcodes&lt;/h2&gt;
+&lt;p&gt;Lets talk about op-codes. Op-codes are the hexadecimal representation of the instructions that we write in assembly. You can extract the opcode for our shell code using the &lt;code class=&quot;highlighter-rouge&quot;&gt;make raw&lt;/code&gt; command. This is just a recipe inside of the make file I added to make the process easier to understand.
+The op-codes that are extracted are the final payload that gets sent to a target that is being exploited. In shellcode you will notice that (for the most part) you will never see 0x00 in them. 0x00 is a null byte and null bytes in shellcode can lead to unreliable shellcode because
+shellcode with null bytes might have opcodes cut off by functions like &lt;code class=&quot;highlighter-rouge&quot;&gt;strcpy()&lt;/code&gt;. If our shellcode has null bytes and is cut off before the ending it could lose crucial functionality. This brings us to our next section.&lt;/p&gt;
+
+&lt;h2 id=&quot;registers&quot;&gt;Registers&lt;/h2&gt;
+&lt;p&gt;Now to talk about registers. Registers are essentially tiny variables that exist on the cpu. They can be used to store data or addresses that point to data.
+On x86 there are 7 general purpose registers. Of that 7 only 4 are normally used by the programmer(ESP, EBP and ESI have their own special uses). The other 4 are EAX, EBX, ECX, and EDX. Each one can store 32 bits(or 4 bytes) of data. Each of those registers has three smaller registers that can be used to access the lower bits
+of the registers. For example the EAX register has AX, AH, and AL. AX is used to access the lower 16 bits of EAX. AL is used to access the lower 8 bits of EAX and AH is used to access the higher 8 bits.
+So why is this important for writing shellcode? Remember back to why null bytes are a bad thing. Using the smaller portions of a register allow us to use &lt;code class=&quot;highlighter-rouge&quot;&gt;mov al, 0x1&lt;/code&gt; and not produce a null byte.
+If we would have done &lt;code class=&quot;highlighter-rouge&quot;&gt;mov eax, 0x1&lt;/code&gt; it would have produced null bytes in our shellcode. EBP, ESP and EIP are each used for a special purpose. EBP is used to point to the base of the stack(explained below), ESP is used to point to the top of the stack(also explained below) and EIP is the instruction pointer. The instruction pointer just points to the address of the next instruction to be executed.&lt;/p&gt;
+
+&lt;h2 id=&quot;the-stack&quot;&gt;The stack&lt;/h2&gt;
+&lt;p&gt;The stack is a portion of memory that programmers can use to store large amounts of data. When a programmer wants to put data onto the stack they use the &lt;code class=&quot;highlighter-rouge&quot;&gt;push &amp;lt;data&amp;gt;&lt;/code&gt; instruction. If they want to retrieve data from the stack they would use the &lt;code class=&quot;highlighter-rouge&quot;&gt;pop &amp;lt;dest&amp;gt;&lt;/code&gt; instruction. The stack is a first in last out(FILO) data structure. A simple way of visualizing this is to think of a pile of books.
+The books on bottom of the pile where placed there first. To get to the book on the bottom of the pile of books you would have to take off the books on top of it.  The base of the stack(most recent thing that is pushed on to the stack) is pointed to by the address ebp and the top of the stack is pointed to by ESP. In our hello world shellcode we can see the instruction &lt;code class=&quot;highlighter-rouge&quot;&gt;mov ecx,esp&lt;/code&gt;. Here we are copying the address of the top of the stack into ECX. If you look at the push instructions we push the newline character then d on to the stack first.
+This is because of the Endieness of x86 and the orientation of the stack. You still maybe wondering why it is that the stack is used in shellcode to store data. The reason is that shellcode do not have access to the data section that normal assembly programs would have. To be able to have our own data we use the &lt;code class=&quot;highlighter-rouge&quot;&gt;push&lt;/code&gt; instruction along with the hexadecimal representation of our characters to store data that would need to be used by our shellcode.&lt;/p&gt;
+
+&lt;h3 id=&quot;putting-it-all-together&quot;&gt;Putting it all together&lt;/h3&gt;
+&lt;p&gt;Okay so now that we have a hold on how to write shellcode. Lets write a shell code that calls &lt;code class=&quot;highlighter-rouge&quot;&gt;sys_execve&lt;/code&gt; to run &lt;code class=&quot;highlighter-rouge&quot;&gt;/bin/sh&lt;/code&gt;. So here is the assembly code.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-assembly&quot; data-lang=&quot;assembly&quot;&gt;section .text
+    global _start
+
+_start:
+    xor eax, eax; safe null
+    push eax; push null byte onto stack
+    push 0x68732f2f ; push /bin//sh
+    push 0x6e69622f 
+    mov ebx,esp ; set ebx to out cmd
+    mov ecx, eax; no args
+    mov edx, eax ; no args again
+    mov al, 0xb ; set sys_execve
+    int 0x80 &lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Save this code into &lt;code class=&quot;highlighter-rouge&quot;&gt;shellcode.asm&lt;/code&gt; and then use &lt;code class=&quot;highlighter-rouge&quot;&gt;make all&lt;/code&gt; to compile it. To test the shellcode you can run &lt;code class=&quot;highlighter-rouge&quot;&gt;./shellcode&lt;/code&gt; like before. You might wonder why we are using &lt;code class=&quot;highlighter-rouge&quot;&gt;/bin//sh&lt;/code&gt; instead of &lt;code class=&quot;highlighter-rouge&quot;&gt;/bin/sh&lt;/code&gt;. We use &lt;code class=&quot;highlighter-rouge&quot;&gt;/bin//sh&lt;/code&gt; because we want our push - es to have a number divisable by 4 so we can push our data on the stack with out null bytes.
+We then use ebx to point to our shellcode. After that we set the args to null and the number of args to null because we are calling /bin//sh without any arguments. Then after that we set al to hex 11 and finish off with an &lt;code class=&quot;highlighter-rouge&quot;&gt;int 0x80&lt;/code&gt; to run our shellcode.&lt;/p&gt;
+
+&lt;h3 id=&quot;useful-links&quot;&gt;Useful links&lt;/h3&gt;
+&lt;p&gt;I am a firm believer that the more sources of knowladge that one person has at their fingers makes it easeir to learn. So here is a list of excellent tutorials other than mine to continue or reafirm your shellcoding journey.&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://0x00sec.org/t/linux-shellcoding-part-1-0/289&quot;&gt;0x00sec&lt;/a&gt; a different x86 linux shellcoding tutorial.&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.exploit-db.com/docs/english/21013-shellcoding-in-linux.pdf&quot;&gt;Exploit db&lt;/a&gt; Exploitdb’s tutorial on linux shellcoding. Nice visuals and talks more about the commands I use in &lt;code class=&quot;highlighter-rouge&quot;&gt;make raw&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;All the shellcode will be up on my &lt;a href=&quot;https://github.com/Rayoflightz&quot;&gt;github&lt;/a&gt;. Thanks for reading and as always happy hacking.&lt;/p&gt;</content><author><name></name></author><summary type="html">Beginning Writing shellcode is an excellent way to learn more about assembly language and how a program communicates with the underlying OS. Put simply shellcode is code that is injected into a running program to make it do something it was not made to do. Normally this is to spawn a shell, but any code made to run after a bug in a program is exploited counts as shellcode.</summary></entry></feed>
