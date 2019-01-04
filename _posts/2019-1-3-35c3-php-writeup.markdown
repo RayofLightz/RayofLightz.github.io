@@ -79,7 +79,8 @@ By having control over the string that gets passed too `unserialize` we can crea
 This part is something that you need to have a tiny understading of, but not a large one.
 Our exploit for the serialized object is `O:1:"B":1:{}` but the program prints out `O:1:"B":0:{}` when echo out the serialized text.
 To put this simply the string starts with an `O` for object then is followed by a `:` which acts a seperator. The number after the separator is the number of arguments that `class B` takes. After that we have a `"B"` which means its a `class B` object. Followed by another seperator and then the "magic" part.
-This number is the amount values in `class B`. When we call `serialize` on our instance of `class B` it removes the global variable from the serialized text. By manually manipulating that value from a `0` to a `1` we are able to have our object recognized the global variable.
+This number is the amount values in `class B`. When we call `serialize` on our instance of `class B` with the changing of `0` to one we cause an error in the `unserialize` function which allows are function to be destructed and print the flag. Note the `@` silences the error thrown by the function.
+Thanks to @sk1di3 for pointing this out to me. I had originally thought that it was something about php not recognizing the global variable.
 If you want a more indepth explination of php serialization check out [php internals][ref].
 
 
