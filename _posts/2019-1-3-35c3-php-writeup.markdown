@@ -6,7 +6,7 @@ categories: writeup web
 
 # 35c3c CTF: php
 I recently participated in the 35c3c ctf. I have enough time to do a quick write up
-and this vulnerability class is intreging to me.
+and this vulnerability class is intriguing to me.
 ## First impressions
 When first downloading the included file there is a tar archive with one file.
 The file is a simple php script (the game ran it on a nc server). Opening up the file I can clearly
