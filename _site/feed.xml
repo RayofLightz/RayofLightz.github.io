@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-01-23T16:01:12-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Playing CTFs for fun and profit(but mostly fun)</title><link href="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html" rel="alternate" type="text/html" title="Playing CTFs for fun and profit(but mostly fun)" /><published>2019-01-23T00:00:00-05:00</published><updated>2019-01-23T00:00:00-05:00</updated><id>http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs</id><content type="html" xml:base="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html">&lt;h1 id=&quot;playing-ctfs-for-fun-and-profitbut-mostly-fun&quot;&gt;Playing CTFs for fun and profit(but mostly fun)&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-01-24T14:55:08-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Playing CTFs for fun and profit(but mostly fun)</title><link href="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html" rel="alternate" type="text/html" title="Playing CTFs for fun and profit(but mostly fun)" /><published>2019-01-23T00:00:00-05:00</published><updated>2019-01-23T00:00:00-05:00</updated><id>http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs</id><content type="html" xml:base="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html">&lt;h1 id=&quot;playing-ctfs-for-fun-and-profitbut-mostly-fun&quot;&gt;Playing CTFs for fun and profit(but mostly fun)&lt;/h1&gt;
 &lt;p&gt;CTFs(or capture the flags) are competitions held to help hone and build upon skills
 in information security. CTFs come in all difficulty levels and some that are more difficult
 even have simpler versions of the main event.&lt;/p&gt;
@@ -11,15 +11,14 @@ We didn’t place, but I got to mess around with some new type of challenges. Af
 Otterctf gave me experience with digital forensics and TUctf was a good ctf for sharpening my skills.
 Then someone started commenting on my blog post I shared on reddit. I will refer them by their screen name &lt;a href=&quot;https://gr3yc1oud.wordpress.com/&quot;&gt;Gr3yc1oud&lt;/a&gt;(They have their own blog). We started messaging back and forth and decided that we wanted to collaborate on something.
 We decided to form a CTF team. Gr3yc1oud posted on reddit looking for teammates and found another six people to join our team.
-We first competed in giraffe CTF to get the team used to communicating. After that we decided to compete in 35c3 ctf.&lt;/p&gt;
+We first competed in giraffe CTF to get the team used to communicating with each other. After that, we decided to compete in 35c3 ctf.&lt;/p&gt;
 
 &lt;h2 id=&quot;so-why-play-ctfs&quot;&gt;So, why play CTFs&lt;/h2&gt;
 &lt;p&gt;There are multiple reasons to play a CTF, but I am going to focus on three of them.&lt;/p&gt;
 
 &lt;h3 id=&quot;meet-new-people&quot;&gt;Meet new people&lt;/h3&gt;
-&lt;p&gt;The best part about CTFs is playing them in a team. Yes you can play them alone, but when you play them in a team 
-setting you learn from your teammates and gain valuable contacts. You can quickly build a set of references by playing in teams.
-While also exapanding your understanding of computer security.&lt;/p&gt;
+&lt;p&gt;The best part about CTFs is playing them in a team. Yes, you can play them alone, but when you play them in a team 
+setting you learn from your teammates and gain valuable contacts. You can quickly build a set of references by playing in teams, while also expanding your understanding of computer security.&lt;/p&gt;
 
 &lt;h3 id=&quot;learn-new-techniques-and-practice&quot;&gt;Learn new techniques and practice&lt;/h3&gt;
 &lt;p&gt;Playing a CTF challenge gives you a chance to build upon your existing skill set while testing your existing ones.
@@ -28,7 +27,7 @@ You get to learn about vulnerabilities in a safe and legal environment.&lt;/p&gt
 &lt;h3 id=&quot;breaking-stuff-is-just-fun&quot;&gt;Breaking stuff is just fun&lt;/h3&gt;
 &lt;p&gt;This is kind of a duplicate of my second reason, but I think it deserves its own section.
 Solving CTF challenges is just like solving a tricky puzzle. The only difference between solving CTF challenges and 
-solving a riddle is that when you solve a CTF challange you get to say to yourself “I’m in” like in the movies.&lt;/p&gt;
+solving a riddle is that when you solve a CTF challenge you get to say to yourself “I’m in” like in the movies.&lt;/p&gt;
 
 &lt;h2 id=&quot;finding-a-ctf-and-a-team&quot;&gt;Finding a CTF and a team&lt;/h2&gt;
 
@@ -41,10 +40,10 @@ Not every bsides has a CTF, but a lot do.&lt;/p&gt;
 &lt;h3 id=&quot;finding-a-team&quot;&gt;Finding a team&lt;/h3&gt;
 &lt;p&gt;This is the hardest part of playing CTFs. Some events that are at a physical location have walk on teams.
 Walk on teams are an excellent way to meet people and get started playing CTFs.
-The only issues is that a lot of online events do not have walk on teams. Finding a team for these can come out of complete random chance.
+The only issue is that a lot of online events do not have walk on teams. Finding a team for these can come out of complete random chance.
 Ctftime has a way to find teams on their website but it takes time and occasionally teams will post comments on events saying that they are looking for new team members.
 There is also an entire &lt;a href=&quot;https://reddit.com/r/CtfTeamLookUp/&quot;&gt;subreddit&lt;/a&gt;(I am a moderator for this subreddit) for finding ctf teams. The community is not very active, but the subreddit is still small and I am hopeful that it will grow.
-Also chat with people online that are into computer security and maybe you will find someone who wants to form a CTF team with you.&lt;/p&gt;
+Also, chat with people online that are into computer security and maybe you will find someone who wants to form a CTF team with you.&lt;/p&gt;
 
 &lt;h2 id=&quot;a-final-note&quot;&gt;A final note&lt;/h2&gt;
 &lt;p&gt;If you are completely new don’t let the fear of failure keep you from trying a CTF.
