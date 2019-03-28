@@ -1,4 +1,77 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-01-24T16:28:55-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Playing CTFs for fun and profit(but mostly fun)</title><link href="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html" rel="alternate" type="text/html" title="Playing CTFs for fun and profit(but mostly fun)" /><published>2019-01-23T00:00:00-05:00</published><updated>2019-01-23T00:00:00-05:00</updated><id>http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs</id><content type="html" xml:base="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html">&lt;h1 id=&quot;playing-ctfs-for-fun-and-profitbut-mostly-fun&quot;&gt;Playing CTFs for fun and profit(but mostly fun)&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-03-27T20:55:30-04:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Binary Patching Using Radare2</title><link href="http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2.html" rel="alternate" type="text/html" title="Binary Patching Using Radare2" /><published>2019-03-26T00:00:00-04:00</published><updated>2019-03-26T00:00:00-04:00</updated><id>http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2</id><content type="html" xml:base="http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2.html">&lt;p&gt;This blog post will talk about using radare2 to patch a binary on the linux platform. You can read this tutorial with no knowledge of radare, but
+you will get a lot more out it if you have some basic knowledge about how to use radare.&lt;/p&gt;
+
+&lt;h2 id=&quot;a-brief-introduction-to-concepts-used-in-this-blog-post&quot;&gt;A Brief Introduction to concepts used in this blog post&lt;/h2&gt;
+
+&lt;h3 id=&quot;radare2&quot;&gt;Radare2&lt;/h3&gt;
+
+&lt;p&gt;Radare2 is an open source reverse engineering framework that supports a large number of different processors and platforms. Radare2 is similar to tools like
+IDA pro, Binary Ninja and Ghidra, but the main difference is that radare runs inside of a terminal window. This is nice because it means that radare can be used
+over a ssh connection or on low power machines. Radare has a lot of awesome features, but this tutorial will focus on the main tool &lt;code class=&quot;highlighter-rouge&quot;&gt;r2&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;binary-patching&quot;&gt;Binary patching&lt;/h3&gt;
+
+&lt;p&gt;Binary patching is the process of modifying a compiled executable to change the code that is run. Radare allows for assembly code to be written inline, compiled and inserted into the binary
+without any hassle.&lt;/p&gt;
+
+&lt;h2 id=&quot;okay-lets-patch-a-binary&quot;&gt;Okay lets patch a binary&lt;/h2&gt;
+
+&lt;h3 id=&quot;getting-a-binary-to-patch&quot;&gt;Getting a binary to patch&lt;/h3&gt;
+
+&lt;p&gt;First off lets get a binary to patch. Here is some source code from &lt;a href=&quot;https://challenges.re/55/&quot;&gt;challenges.re&lt;/a&gt; challenge 55.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#include &amp;lt;stdio.h&amp;gt;
+&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;printing_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;f(%d)&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;printing_function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Compile this using &lt;code class=&quot;highlighter-rouge&quot;&gt;gcc -o patcher patcher.c&lt;/code&gt; then make a copy of the binary that we can mess up on when we try to patch it using &lt;code class=&quot;highlighter-rouge&quot;&gt;cp patcher test&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;reverse-time&quot;&gt;Reverse time&lt;/h3&gt;
+&lt;p&gt;Fist of we need to open the binary in radare with write capabilities.
+Run the command &lt;code class=&quot;highlighter-rouge&quot;&gt;r2 -w test&lt;/code&gt; and you will be presented with a radare prompt.
+Next we need to analyze the binary. From the prompt type in &lt;code class=&quot;highlighter-rouge&quot;&gt;aaa&lt;/code&gt; this will tell radare to anaylize all things apart of the binary.
+To make this simple we can go in with the assumption that we know the program is written in c. Think to yourself “what is function exists in every c program”.
+If you answered main you are correct.
+Next we need to seek to the main function. The radare command to do this is very simple ‘s main’.
+Now we are at the location of main. After this type the following command &lt;code class=&quot;highlighter-rouge&quot;&gt;V&lt;/code&gt; you will then see the terminal change don’t panic or hit any keys.
+You are in the default visual mode, the hex editor, we need to swap into the inline disasembler. To do that hit the ‘p’ key.
+You should be prompted with something that looks like this. 
+ &lt;img src=&quot;/assets/radaremaindis.png&quot; alt=&quot;inline disassembler in radare2&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;From here you can navigate the disassembly using the arrow keys or J and K like in vim.
+Radare makes it very easy to see what variables are mapped to what stack offset. In this case we can see the variable &lt;code class=&quot;highlighter-rouge&quot;&gt;local_4h&lt;/code&gt; that is mapped to &lt;code class=&quot;highlighter-rouge&quot;&gt;rbp-0x4&lt;/code&gt; with the type int.
+We also see the structure of a for loop starting at the &lt;code class=&quot;highlighter-rouge&quot;&gt;jmp 0x68d&lt;/code&gt; instruction and the comaprison statement where the value of &lt;code class=&quot;highlighter-rouge&quot;&gt;local_4h&lt;/code&gt; is compared to 9.
+We also see the function &lt;code class=&quot;highlighter-rouge&quot;&gt;sym.printing_function&lt;/code&gt; being called with the value of &lt;code class=&quot;highlighter-rouge&quot;&gt;local_4h&lt;/code&gt;.
+What if we wanted to make it so that printing function was called say… 32 times. We would change the &lt;code class=&quot;highlighter-rouge&quot;&gt;cmp&lt;/code&gt; instruction to &lt;code class=&quot;highlighter-rouge&quot;&gt;cmp dword [local_4h_addr], 0x20&lt;/code&gt; , but how do we do that?
+The answer is patching the binary using radare’s awesome patching powers. First “scroll” down to the &lt;code class=&quot;highlighter-rouge&quot;&gt;cmp&lt;/code&gt; line and press the capital A key. You will be presented with a prompt that allows you to type assembly and have it be compiled and inserted in the place of the &lt;code class=&quot;highlighter-rouge&quot;&gt;cmp&lt;/code&gt; line.
+Here is what it will look like. The assembly to insert is &lt;code class=&quot;highlighter-rouge&quot;&gt;cmp dword [rbp-0x4], 0x20&lt;/code&gt;
+&lt;img src=&quot;/assets/inlinepatch.png&quot; alt=&quot;Patch prompt&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;To finish off the patch hit enter and then hit q to exit the visual mode and then q enter to exit radare.
+If you opened the binary in write mode you should be able to run &lt;code class=&quot;highlighter-rouge&quot;&gt;./test&lt;/code&gt; and get a different output then that of &lt;code class=&quot;highlighter-rouge&quot;&gt;./patcher&lt;/code&gt;
+Congrats you have patched your first binary.&lt;/p&gt;
+
+&lt;p&gt;Here is a gif from BBC’s James May: The Reassembler to celebrate your reverse engineering adventure.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/may.gif&quot; alt=&quot;Reassembler&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;helpful-resources&quot;&gt;Helpful resources&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://null-byte.wonderhowto.com/how-to/binary-patching-brute-force-reverse-engineering-with-ida-and-hopper-and-hex-editor-0157194/&quot;&gt;With ida&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf&quot;&gt;64 bit cheat sheet&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">This blog post will talk about using radare2 to patch a binary on the linux platform. You can read this tutorial with no knowledge of radare, but you will get a lot more out it if you have some basic knowledge about how to use radare.</summary></entry><entry><title type="html">Playing CTFs for fun and profit(but mostly fun)</title><link href="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html" rel="alternate" type="text/html" title="Playing CTFs for fun and profit(but mostly fun)" /><published>2019-01-23T00:00:00-05:00</published><updated>2019-01-23T00:00:00-05:00</updated><id>http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs</id><content type="html" xml:base="http://localhost:4000/ctfs/2019/01/23/why-to-play-ctfs.html">&lt;h1 id=&quot;playing-ctfs-for-fun-and-profitbut-mostly-fun&quot;&gt;Playing CTFs for fun and profit(but mostly fun)&lt;/h1&gt;
 &lt;p&gt;CTFs(or capture the flags) are competitions held to help hone and build upon skills
 in information security. CTFs come in all difficulty levels and some that are more difficult
 even have simpler versions of the main event.&lt;/p&gt;
