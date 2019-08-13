@@ -1,4 +1,89 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-03-27T20:55:30-04:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Binary Patching Using Radare2</title><link href="http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2.html" rel="alternate" type="text/html" title="Binary Patching Using Radare2" /><published>2019-03-26T00:00:00-04:00</published><updated>2019-03-26T00:00:00-04:00</updated><id>http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2</id><content type="html" xml:base="http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2.html">&lt;p&gt;This blog post will talk about using radare2 to patch a binary on the linux platform. You can read this tutorial with no knowledge of radare, but
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-08-13T16:44:31-04:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Android Reverse Engineering: Broadlink econtrol</title><link href="http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" rel="alternate" type="text/html" title="Android Reverse Engineering: Broadlink econtrol" /><published>2019-08-13T00:00:00-04:00</published><updated>2019-08-13T00:00:00-04:00</updated><id>http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering:-Broadlink-econtrol</id><content type="html" xml:base="http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html">&lt;h3 id=&quot;an-introduction&quot;&gt;An introduction&lt;/h3&gt;
+&lt;p&gt;The broadlink e-control was built to control broadlinks line of IR/RF emitters.
+These devices are fairly inexpensive and given what they were built for, the homeautomation community has already
+created support for the broadlink IR/RF switches. The purpose of this post is not to find or create something new, but to
+demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the &lt;em&gt;coughs&lt;/em&gt;
+spoiler &lt;em&gt;coughs&lt;/em&gt; 128 bit aes key and iv.&lt;/p&gt;
+
+&lt;h2 id=&quot;why-andriod&quot;&gt;Why Andriod&lt;/h2&gt;
+&lt;p&gt;To make it clear I am 100 percent sold to the IOS platform, but android applications have a few benefits when it comes to make RE a lot easier.
+The first being that most andriod applications are written in java and decompilers can be used to obtain a close to source representation.
+The second is that it is a lot easier to obtain apks (the andriod application package format) than it is ipas (the ios application package format).&lt;/p&gt;
+
+&lt;h2 id=&quot;first-step-reconextraction&quot;&gt;First step: Recon/extraction&lt;/h2&gt;
+&lt;p&gt;After obtaining the apk from &lt;a href=&quot;https://apkpure.com/e-control/com.broadlink.rmt&quot;&gt;Apkpure&lt;/a&gt;, the first step is to extract the contents of the apk. This is fairly simple because 
+apks are zip files with other fancy jargon inside (More on said jargon later). To extract the contents of the apk this command will suffice.
+&lt;code class=&quot;highlighter-rouge&quot;&gt;unzip econtrol.apk&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Here is the resulting file structure&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;.
+├── AndroidManifest.xml
+├── assets
+├── build-data.properties
+├── classes.dex
+├── com
+├── e Control_v3.8.16_apkpure.com.apk
+├── jsr305_annotations
+├── lib
+├── META-INF
+├── org
+├── res
+└── resources.arsc
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Now a quick explination of the aformentioned jargon. The &lt;code class=&quot;highlighter-rouge&quot;&gt;AndroidManifest.xml&lt;/code&gt; is an Andriod binary xml file that contains information about the apk.
+Most importantly it contians the permissions of the application; which is useful if you are reverse engineering malware.
+The &lt;code class=&quot;highlighter-rouge&quot;&gt;META-INF&lt;/code&gt; directory contains more metadata. The &lt;code class=&quot;highlighter-rouge&quot;&gt;res&lt;/code&gt; directory has non code resources and lib has thirdparty or system libraries (non java).
+The &lt;code class=&quot;highlighter-rouge&quot;&gt;classes.dex&lt;/code&gt; file is the compiled java byte code that will run on the dalvik vm (Androids JVM implementation).
+In the case of the broadlink e-control application, what we care most about is the &lt;code class=&quot;highlighter-rouge&quot;&gt;classes.dex&lt;/code&gt; and the &lt;code class=&quot;highlighter-rouge&quot;&gt;lib&lt;/code&gt; directory.&lt;/p&gt;
+
+&lt;p&gt;Next we can use jadx to decompile the apk into a new directory; &lt;code class=&quot;highlighter-rouge&quot;&gt;out&lt;/code&gt; in this command example.
+&lt;code class=&quot;highlighter-rouge&quot;&gt;jadx -d out classes.dex&lt;/code&gt;
+Next we can start poking around the decompiled code.
+While browsing the source code a few files and directories stood out. Notably:&lt;/p&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;file: out/sources/cn/com/broadlink/networkapi/NetworkAPI.java
+dir: out/sources/cn/com/broadlink/blnetworkdataparse
+dir: out/sources/cn/com/broadlink/blnetworkunit
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;And now onto reverse engineering the code.&lt;/p&gt;
+
+&lt;h2 id=&quot;reverseing-and-key-discovery&quot;&gt;Reverseing and key discovery&lt;/h2&gt;
+&lt;p&gt;The first off is the NetworkAPI java file. This file wraps a system library; which means that we get to reverse some arm assembly.
+Under the lib directory there is a file called libNetworkAPI.so which is an android shared object.
+Next, we can open up the NetworkAPI shared object into ghidra. 
+After opening the shared object with ghidra I started by searching for xrefs on the socket function. I found a function called &lt;code class=&quot;highlighter-rouge&quot;&gt;bl_device_send_data&lt;/code&gt;.
+This function is the lower level version of another function called &lt;code class=&quot;highlighter-rouge&quot;&gt;networkapi_device_send_data&lt;/code&gt;. Luckily for us the broadlink developers left
+several debug messages that help in identifying functions that ghidra did not detect. While reverse engineering the network stack I discovered two things.&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;The application uses udp for communication.(Interesting if you wanted to reimplement the entire api)&lt;/li&gt;
+  &lt;li&gt;Data is encrypted with 128 bit aes.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;It should be noted that there are other interesting things in this binary, but for the sake of keeping this short I will focus on getting the key and IV.
+While performing static analysis on the shared object I was able to find the IV in the decompilation of the function &lt;code class=&quot;highlighter-rouge&quot;&gt;data_aes_decrypt&lt;/code&gt;. 
+&lt;img src=&quot;/assets/decryptFunc.png&quot; alt=&quot;The decryption function being called with log messages being shown&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I then copied the hex bytes of the key.
+Next thing I do is look at the data entry under the one for the IV. Looking at it is 16 bytes (128 bit) just like the IV. Looking at the XREFs for the data it is accessed by a function that is in turn called by &lt;code class=&quot;highlighter-rouge&quot;&gt;bl_device_send_data&lt;/code&gt;.
+So according to my findings the key should be &lt;code class=&quot;highlighter-rouge&quot;&gt;097628343fe99e23765c1513accf8b02&lt;/code&gt; in hex and the IV is &lt;code class=&quot;highlighter-rouge&quot;&gt;562e17996d093d28ddb3ba695a2e6f58&lt;/code&gt;. 
+&lt;img src=&quot;/assets/ghidraKeys.png&quot; alt=&quot;The keys in ghidra listing view&quot; /&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;confirmation&quot;&gt;Confirmation&lt;/h2&gt;
+&lt;p&gt;The broadlink device has already been reverse engineered and the entire api has been reimplemented in python.
+This is very helpful because instead of writing a script to test my findings I can read the already existing documentation. 
+The documnetation can be accessed &lt;a href=&quot;https://github.com/mjg59/python-broadlink/blob/master/protocol.md&quot;&gt;here&lt;/a&gt;. Sure enough the key and iv I found were correct.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;While I did not make any ground breaking research, I was able to go through the process of reverse engineering a production android application.
+I was able to gain more hands on experience with ghidra and the ARM platform. Most importantly it was a fun challenge and a nice change
+from mostly reversing CTF challenges.&lt;/p&gt;
+
+&lt;h2 id=&quot;other-good-resources&quot;&gt;Other good resources&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.evilsocket.net/2017/04/27/Android-Applications-Reversing-101/&quot;&gt;Evilsocket’s andriod reversing 101&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://maddiestone.github.io/AndroidAppRE/app_fundamentals.html&quot;&gt;Maddie Stone’s andriod RE 101&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://developer.android.com/docs&quot;&gt;Android Docs&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</content><author><name></name></author><summary type="html">An introduction The broadlink e-control was built to control broadlinks line of IR/RF emitters. These devices are fairly inexpensive and given what they were built for, the homeautomation community has already created support for the broadlink IR/RF switches. The purpose of this post is not to find or create something new, but to demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the coughs spoiler coughs 128 bit aes key and iv.</summary></entry><entry><title type="html">Binary Patching Using Radare2</title><link href="http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2.html" rel="alternate" type="text/html" title="Binary Patching Using Radare2" /><published>2019-03-26T00:00:00-04:00</published><updated>2019-03-26T00:00:00-04:00</updated><id>http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2</id><content type="html" xml:base="http://localhost:4000/linux/assembly/2019/03/26/Binary-patching-using-radare2.html">&lt;p&gt;This blog post will talk about using radare2 to patch a binary on the linux platform. You can read this tutorial with no knowledge of radare, but
 you will get a lot more out it if you have some basic knowledge about how to use radare.&lt;/p&gt;
 
 &lt;h2 id=&quot;a-brief-introduction-to-concepts-used-in-this-blog-post&quot;&gt;A Brief Introduction to concepts used in this blog post&lt;/h2&gt;
