@@ -9,13 +9,13 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="An introduction The broadlink e-control was built to control broadlinks line of IR/RF emitters. These devices are fairly inexpensive and given what they were built for, the homeautomation community has already created support for the broadlink IR/RF switches. The purpose of this post is not to find or create something new, but to demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the coughs spoiler coughs 128 bit aes key and iv." />
 <meta property="og:description" content="An introduction The broadlink e-control was built to control broadlinks line of IR/RF emitters. These devices are fairly inexpensive and given what they were built for, the homeautomation community has already created support for the broadlink IR/RF switches. The purpose of this post is not to find or create something new, but to demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the coughs spoiler coughs 128 bit aes key and iv." />
-<link rel="canonical" href="http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" />
-<meta property="og:url" content="http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" />
+<link rel="canonical" href="http://localhost:4000/re/android/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" />
+<meta property="og:url" content="http://localhost:4000/re/android/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" />
 <meta property="og:site_name" content="wolfshirtz" />
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2019-08-13T00:00:00-04:00" />
 <script type="application/ld+json">
-{"dateModified":"2019-08-13T00:00:00-04:00","datePublished":"2019-08-13T00:00:00-04:00","@type":"BlogPosting","headline":"Android Reverse Engineering: Broadlink econtrol","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html"},"url":"http://localhost:4000/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html","description":"An introduction The broadlink e-control was built to control broadlinks line of IR/RF emitters. These devices are fairly inexpensive and given what they were built for, the homeautomation community has already created support for the broadlink IR/RF switches. The purpose of this post is not to find or create something new, but to demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the coughs spoiler coughs 128 bit aes key and iv.","@context":"http://schema.org"}</script>
+{"dateModified":"2019-08-13T00:00:00-04:00","datePublished":"2019-08-13T00:00:00-04:00","@type":"BlogPosting","headline":"Android Reverse Engineering: Broadlink econtrol","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/re/android/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html"},"url":"http://localhost:4000/re/android/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html","description":"An introduction The broadlink e-control was built to control broadlinks line of IR/RF emitters. These devices are fairly inexpensive and given what they were built for, the homeautomation community has already created support for the broadlink IR/RF switches. The purpose of this post is not to find or create something new, but to demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the coughs spoiler coughs 128 bit aes key and iv.","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="wolfshirtz" /></head>
 <body><header class="site-header" role="banner">
@@ -52,10 +52,10 @@ created support for the broadlink IR/RF switches. The purpose of this post is no
 demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the <em>coughs</em>
 spoiler <em>coughs</em> 128 bit aes key and iv.</p>
 
-<h2 id="why-andriod">Why Andriod</h2>
+<h2 id="why-android">Why Android</h2>
 <p>To make it clear I am 100 percent sold to the IOS platform, but android applications have a few benefits when it comes to make RE a lot easier.
-The first being that most andriod applications are written in java and decompilers can be used to obtain a close to source representation.
-The second is that it is a lot easier to obtain apks (the andriod application package format) than it is ipas (the ios application package format).</p>
+The first being that most android applications are written in java and decompilers can be used to obtain a close to source representation.
+The second is that it is a lot easier to obtain apks (the android application package format) than it is ipas (the ios application package format).</p>
 
 <h2 id="first-step-reconextraction">First step: Recon/extraction</h2>
 <p>After obtaining the apk from <a href="https://apkpure.com/e-control/com.broadlink.rmt">Apkpure</a>, the first step is to extract the contents of the apk. This is fairly simple because 
@@ -127,13 +127,13 @@ from mostly reversing CTF challenges.</p>
 
 <h2 id="other-good-resources">Other good resources</h2>
 <ul>
-  <li><a href="https://www.evilsocket.net/2017/04/27/Android-Applications-Reversing-101/">Evilsocket’s andriod reversing 101</a></li>
-  <li><a href="https://maddiestone.github.io/AndroidAppRE/app_fundamentals.html">Maddie Stone’s andriod RE 101</a></li>
+  <li><a href="https://www.evilsocket.net/2017/04/27/Android-Applications-Reversing-101/">Evilsocket’s android reversing 101</a></li>
+  <li><a href="https://maddiestone.github.io/AndroidAppRE/app_fundamentals.html">Maddie Stone’s android RE 101</a></li>
   <li><a href="https://developer.android.com/docs">Android Docs</a></li>
 </ul>
 
 
-  </div><a class="u-url" href="/re/andriod/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" hidden></a>
+  </div><a class="u-url" href="/re/android/2019/08/13/Android-Reverse-Engineering-Broadlink-econtrol.html" hidden></a>
 </article>
 
       </div>

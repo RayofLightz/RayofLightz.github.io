@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Android Reverse Engineering: Broadlink econtrol"
-categories: re andriod
+categories: re android
 ---
 
 ### An introduction
@@ -11,10 +11,10 @@ created support for the broadlink IR/RF switches. The purpose of this post is no
 demonstrate the process of how to tinker with IOT devices and their companion android applications. My goal for this post is to find the *coughs*
 spoiler *coughs* 128 bit aes key and iv. 
 
-## Why Andriod
+## Why Android
 To make it clear I am 100 percent sold to the IOS platform, but android applications have a few benefits when it comes to make RE a lot easier.
-The first being that most andriod applications are written in java and decompilers can be used to obtain a close to source representation.
-The second is that it is a lot easier to obtain apks (the andriod application package format) than it is ipas (the ios application package format).
+The first being that most android applications are written in java and decompilers can be used to obtain a close to source representation.
+The second is that it is a lot easier to obtain apks (the android application package format) than it is ipas (the ios application package format).
 
 ## First step: Recon/extraction
 After obtaining the apk from [Apkpure][ApkPure], the first step is to extract the contents of the apk. This is fairly simple because 
@@ -85,8 +85,8 @@ I was able to gain more hands on experience with ghidra and the ARM platform. Mo
 from mostly reversing CTF challenges. 
 
 ## Other good resources
-* [Evilsocket's andriod reversing 101][Evil]
-* [Maddie Stone's andriod RE 101][Maddie]
+* [Evilsocket's android reversing 101][Evil]
+* [Maddie Stone's android RE 101][Maddie]
 * [Android Docs][AndD]
 
 [Pyimpl]: https://github.com/mjg59/python-broadlink/blob/master/protocol.md
