@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Android Reverse Engineering: Broadlink econtrol"
-categories: re android
+categories: re andriod
 ---
 
 ### An introduction
