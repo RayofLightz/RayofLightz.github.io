@@ -132,8 +132,10 @@ table td { border: 1px solid #a8b08d; }
 @media screen and (max-width: 800px) { .post-content h4 { font-size: 18px; } }
 
 /** Syntax highlighting styles */
+.highlighter-rouge { background-color: #eef; color: #0a0a0a; }
+
 .highlight { background: #272727; color: #0a0a0a; }
-.highlighter-rouge .highlight { color: #0a0a0a; background: #eef; }
+.highlighter-rouge .highlight { background-color: #eef; color: #0a0a0a; }
 .highlight .c { color: #998; font-style: italic; }
 .highlight .err { color: #a61717; background-color: #e3d2d2; }
 .highlight .k { font-weight: bold; }
