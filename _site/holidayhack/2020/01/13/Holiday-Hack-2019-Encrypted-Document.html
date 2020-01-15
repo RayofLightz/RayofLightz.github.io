@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>KringleCon 2: Recovering the clear text document | wolfshirtz</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="KringleCon 2: Recovering the clear text document" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="KringleCon 2: Recovering the clear text document" />
+<meta property="og:description" content="KringleCon 2: Recovering the clear text document" />
+<link rel="canonical" href="http://localhost:4000/holidayhack/2020/01/13/Holiday-Hack-2019-Encrypted-Document.html" />
+<meta property="og:url" content="http://localhost:4000/holidayhack/2020/01/13/Holiday-Hack-2019-Encrypted-Document.html" />
+<meta property="og:site_name" content="wolfshirtz" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-01-13T00:00:00-05:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"KringleCon 2: Recovering the clear text document","dateModified":"2020-01-13T00:00:00-05:00","url":"http://localhost:4000/holidayhack/2020/01/13/Holiday-Hack-2019-Encrypted-Document.html","datePublished":"2020-01-13T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/holidayhack/2020/01/13/Holiday-Hack-2019-Encrypted-Document.html"},"description":"KringleCon 2: Recovering the clear text document","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="wolfshirtz" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">wolfshirtz</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">KringleCon 2: Recovering the clear text document</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-01-13T00:00:00-05:00" itemprop="datePublished">Jan 13, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="kringlecon-2-recovering-the-clear-text-document">KringleCon 2: Recovering the clear text document</h1>
+
+<h2 id="overview">Overview</h2>
+<p>The elfscrow program used a predictable seed(time) along with a predictable PRNG. Given that time was the seed and that we were supplied with a 
+time window, it was determined that there were 7200 possible keys. After bruteforcing the key the flag was found to be “Machine Learning Sleigh Route Finder”</p>
+
+<h2 id="challenge-text">Challenge text</h2>
+
+<p>“The Elfscrow Crypto tool is a vital asset used at Elf University for encrypting SUPER SECRET documents. We can’t send you the source, but we do have debug symbols that you can use.</p>
+
+<p>Recover the plaintext content for this encrypted document. We know that it was encrypted on December 6, 2019, between 7pm and 9pm UTC.</p>
+
+<p>What is the middle line on the cover page? (Hint: it’s five words)”</p>
+
+<h2 id="initial-thoughts">Initial thoughts</h2>
+<p>The challenge gives us a binary, a pdb file, an encrypted document, and a ruff time estimate of when the document was encrypted.</p>
+
+<p>My first impression was a glimmer of hope that the uuid would be time based, but it was uuid 4 so it was completely random. With that path exhausted fairly quickly I moved on to gathering more information.
+I ran the program with no arguments and saw that there was a flag called <code class="highlighter-rouge">--insecure</code>. The description for that flag was that it would send the traffic over http instead of https. I opened up wireshark and captured some packets while
+running the program.</p>
+
+<p><img src="/assets/wireshark_by_cmd.png" alt="firstRun" /></p>
+
+<h2 id="networking-in-the-binary">Networking in the binary</h2>
+<p>While reverse engineering the application I first looked for xrefs to <code class="highlighter-rouge">HttpSendRequestA</code> because while running the program I saw it print out url endpoints.
+There were two functions that called <code class="highlighter-rouge">HttpSendRequestA</code>.
+<img src="/assets/Http-xrefs.png" alt="HttpXrefs" />
+This helped me narrow down what functions were dealing with the actual encryption keys (Note I could have just as easily looked for xrefs to the encryption functions,
+but I really wanted to understand how the binary works).</p>
+
+<p>The two functions each had different api endpoints that they called out to. I decided to look at the one calling out to <code class="highlighter-rouge">/api/register</code> (I will refer to the function as storeKey from here on out). Inside of storeKey a few notable
+things can be seen</p>
+<ol>
+  <li>The user agent ““ElfScrow V1.01 (SantaBrowse Compatible)”</li>
+  <li>The server sends back the uuid key after making a POST request with the key. It then prints a message telling the user to hold onto it for decryption later.</li>
+  <li>This is the most important part, the key is passed as a parameter to <code class="highlighter-rouge">storeKey</code>, which means that whatever function that calls it will have access to the key :)</li>
+</ol>
+
+<p>For the rest of this section I am going to cover the other function, note it does not relate directly to the solution, but I think its fun to get a better understanding of how the binary works.</p>
+
+<p>The second function that deals with networking I am going to call <code class="highlighter-rouge">checkKeyServer</code>. <code class="highlighter-rouge">checkKeyServer</code> calls out to the api endpoint <code class="highlighter-rouge">/api/retrieve</code>. This function is basically the inverse of 
+<code class="highlighter-rouge">storeKey</code>.<code class="highlighter-rouge">checkKeyServer</code> takes the uuid that <code class="highlighter-rouge">storeKey</code> gets back from the server and queries the server for the associated encryption key. It then reads that key into a buffer which is later used for decryption.</p>
+
+<h2 id="cryptography">Cryptography</h2>
+
+<h3 id="identifying-the-algorithm-and-the-ms-crept-functions">Identifying the algorithm and the MS crept functions</h3>
+<p>But how does that networking information lead us to the crypto part? The secret lies into the xrefs from <code class="highlighter-rouge">storeKey</code>. Store key is called by a high level function I am going to call <code class="highlighter-rouge">encrypt</code>. When first looking at <code class="highlighter-rouge">encrypt</code>
+I noticed the following interesting function calls along with the Microsoft documentation links for them</p>
+<ol>
+  <li><code class="highlighter-rouge">CryptAcquireContext</code> - https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta</li>
+  <li><code class="highlighter-rouge">CryptImportKey</code> - https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptimportkey</li>
+  <li><code class="highlighter-rouge">CryptEncrypt</code> - https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptencrypt</li>
+</ol>
+
+<p>These are all functions from <code class="highlighter-rouge">advapi.dll</code> and more specifically they are functions from the old windows cryptography interface. 
+For those who ignored the msdn docs here is some pseudo code of how to use the functions</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>context Context
+HCRYPTKEY impKey
+
+CryptAcquireContext(&amp;Context)
+
+key = 'HopeFully-A-Properly-Generated-Key'
+
+CryptImportKey(Context, key, impKey)
+CryptEncrypt(impKey, stuffToEncrypt)
+</code></pre></div></div>
+
+<p>This pseudo code oversimplifies how the functions actually work to make the process of encryption easier to understand. First a context is created, then a key is ‘securely generated’, next the aforementioned key is
+imported into the context and loads a HCRYPTKEY struct and finally we encrypt the data. I RECOMMEND READING THE MICROSOFT DOCS FOR A BETTER UNDERSTANDING OF THESE FUNCTIONS!!!!, however that is the 
+simplified version of what is occurring.</p>
+
+<p>With this knowledge we need to find two thing still</p>
+<ol>
+  <li>The encryption algorithm and the mode of operation</li>
+  <li>The keygen</li>
+</ol>
+
+<p>Luckily for us Santa’s elves in the software development branch on the north pole left a lot of handy debug messages in the code for example the helpful error message</p>
+
+<p><code class="highlighter-rouge">CryptImportKey failed for DES-CBC key</code></p>
+
+<p>Now we now the encryption algorithm and the mode in which it operates.
+It can also be seen that no initialization vector (IV) is set, which is bad practice.</p>
+
+<p>Now on to reversing the key gen algorithm.</p>
+
+<h3 id="keygen">Keygen</h3>
+<p>The next step is figuring out how the keygen algorithm is implemented. From here on out I am going to call the top level keygen function <code class="highlighter-rouge">keyGen</code>.</p>
+
+<p>Looking at the ghidra decompile three (non standard) functions, which I renamed <code class="highlighter-rouge">genSeed</code>, <code class="highlighter-rouge">genBytes</code> and <code class="highlighter-rouge">setSeed</code>, are called.
+The two functions of particular interest are <code class="highlighter-rouge">genSeed</code> and <code class="highlighter-rouge">genBytes</code>.</p>
+
+<p><img src="/assets/keyGen.png" alt="KeyGen" /></p>
+
+<p>Looking at the looking at the rough decompile of <code class="highlighter-rouge">genSeed</code> it can be seen that the function <code class="highlighter-rouge">_time64</code> is called.</p>
+
+<p><img src="/assets/genSeed.png" alt="genSeed" /></p>
+
+<p>According to the Microsoft documentation for <code class="highlighter-rouge">_time64</code></p>
+
+<p>“(time64) Returns the time as seconds elapsed since midnight, January 1, 1970”</p>
+
+<p>This means the seed is the number of second since epoch. Keep this in mind because this is the first crucial mistake that the elves made while developing this application.</p>
+
+<p>Next comes looking into <code class="highlighter-rouge">genBytes</code>. The most effective way to reverse this function is to look at the disassembly instead of the decompile.</p>
+
+<p><img src="/assets/genBytes.png" alt="genBytes" /></p>
+
+<p>Here is a translation of the decompile to pseudo code</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>seed = seed * 0x343fd + 0x269ec3
+seed = SHIFT_RIGHT_BY_0x10(seed)
+seed = AND_BY_0x7FFF(seed)
+return seed
+</code></pre></div></div>
+
+<p>This is a predictable “random” number generator (Also called an PRNG which is short for pseudo random number generator). Before we implement it, there is one more detail that is needed from the disassembly of <code class="highlighter-rouge">keyGen</code>.</p>
+
+<p><img src="/assets/moreDis.png" alt="keyGenDis" /></p>
+
+<p>Looking at the disassembly of <code class="highlighter-rouge">keyGen</code> the line that matters the most is <code class="highlighter-rouge">AND ECX, 0xff</code> put simply this assembly takes the return of <code class="highlighter-rouge">genBytes</code> and converts it into a single byte.
+That byte is then append to the key. This is the second issue that was made that allows for this challenge to be solved, a predictable RNG algorithm was used. 
+With these two bits of information we can move onto decryption the document.</p>
+
+<h2 id="exploiting-the-flaw">Exploiting the flaw</h2>
+
+<p>Okay after reversing the crypto we now know that the program uses a predictable PRNG and a non random seed, but you may be wondering how this could lead to use being able to decrypt the document.
+The answer to that is that if you recall we are given a time frame in which the document was encrypted, specifically the time frame was December 6, 2019, between 7pm and 9pm UTC, these values
+can be converted to seconds since the epoch and since we know that it is a two hour time frame that means that there are 7200 possible keys to allow for the document to be decrypted.
+Cryptographically speaking that is a very low number of possibilities for the key. Okay so we know the flaw now lets look at the solution code.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">Crypto.Cipher</span> <span class="kn">import</span> <span class="n">DES</span> <span class="k">as</span> <span class="n">Des</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="k">def</span> <span class="nf">genKey</span><span class="p">(</span><span class="n">seedTime</span><span class="p">):</span>
+    <span class="c">#Based on the disassembly</span>
+    <span class="n">seed</span> <span class="o">=</span> <span class="n">seedTime</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">*</span> <span class="mh">0x343fd</span> <span class="o">+</span> <span class="mh">0x269ec3</span>
+        <span class="n">key</span><span class="o">.</span><span class="n">append</span><span class="p">((((</span><span class="n">seed</span> <span class="o">&gt;&gt;</span> <span class="mh">0x10</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x7fff</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">key</span>
+
+<span class="k">def</span> <span class="nf">genPossibleKeys</span><span class="p">():</span>
+    <span class="c">#Iterate over the possible time values</span>
+    <span class="c">#Note this will loop over 7202 possible keys because I expanded the window by two</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1575658799</span><span class="p">,</span> <span class="mi">1575666001</span><span class="p">):</span>
+        <span class="n">keyList</span> <span class="o">=</span> <span class="n">genKey</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">keyList</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">decryptFunc</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">outfile</span><span class="p">):</span>
+    <span class="c">#This is used to benchmark the amount of time a single decypt takes</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c">#This creates the des-cbc cipher, which has a null iv</span>
+    <span class="n">cipher</span> <span class="o">=</span> <span class="n">Des</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Des</span><span class="o">.</span><span class="n">MODE_CBC</span><span class="p">,</span> <span class="n">b</span><span class="s">'</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s">'</span><span class="p">)</span>
+    
+    <span class="c">#Open our two files for decryption</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">"ElfUResearchLabsSuperSledOMaticQuickStartGuideV1.2.pdf.enc"</span><span class="p">,</span> <span class="s">"rb"</span><span class="p">)</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="s">"wb+"</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Decrypting to {}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">outfile</span><span class="p">))</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cipher</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Time to run dec: "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">genPossibleKeys</span><span class="p">())</span>
+    <span class="c">#Iterate over the possible keys and run try and decrypt them</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)):</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="s">"outdir/attempt{}.dec"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">decryptFunc</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">fileName</span><span class="p">)</span></code></pre></figure>
+
+<p>This is a simple python script I wrote to go through and test every possible key (bruteforce), it then stores the decryption results into 
+an output directory <code class="highlighter-rouge">outdir/</code>. Run this script and then go brew yourself some tea depending on how fast your computer is.</p>
+
+<p>You will be left with a directory of 7202 files which seems useless at first, but with the help of a simple bash oneliner we can find the intended output.</p>
+
+<p><code class="highlighter-rouge">file output/* | grep 'PDF'</code></p>
+
+<p>That oneliner will return a single pdf. After opening the pdf file in a viewer I confirmed that it was the correct result.</p>
+
+<p><img src="/assets/WootWoot.png" alt="WootWoot" /></p>
+
+<p>The flag was “Machine Learning Sleigh Route Finder”</p>
+
+<h2 id="how-to-prevent-something-like-this">How to prevent something like this</h2>
+<p>The easiest way to prevent an attack like this would be to use a “secure” PRNG with a non predictable seed. 
+For win32 use a function like <code class="highlighter-rouge">BCryptGenRandom</code>, if you are on a different platform make sure to research a safe PRNG. 
+The overkill answer is to use a hardware based RNG, but these can become expensive and most consumers don’t have one.</p>
+
+<h2 id="final-notes">Final notes</h2>
+
+<h3 id="summary">Summary</h3>
+<p>Elfscrow used contained a poorly implemented keygen algorithm that allowed for a possible bruteforce. To avoid this remember that it is not safe to role you own keygen and that time should</p>
+
+<h3 id="my-experience">My experience</h3>
+<p>This was a fun challenge. I love reverse engineering things and this challenge gave me the change to play around with the win32 crypto stack. SANS did an excellent job with this challenge!</p>
+
+  </div><a class="u-url" href="/holidayhack/2020/01/13/Holiday-Hack-2019-Encrypted-Document.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">wolfshirtz</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">wolfshirtz</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/RayofLightz"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">RayofLightz</span></a></li><li><a href="https://www.twitter.com/wolfshirtz"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">wolfshirtz</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
