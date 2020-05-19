@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Bite Sized Rust RE: 1 Deconstructing Hello World | wolfshirtz</title>
+<meta name="generator" content="Jekyll v3.7.4" />
+<meta property="og:title" content="Bite Sized Rust RE: 1 Deconstructing Hello World" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Bite Sized Rust RE: 1 Deconstructing Hello World" />
+<meta property="og:description" content="Bite Sized Rust RE: 1 Deconstructing Hello World" />
+<link rel="canonical" href="http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html" />
+<meta property="og:url" content="http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html" />
+<meta property="og:site_name" content="wolfshirtz" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-05-19T00:00:00-04:00" />
+<script type="application/ld+json">
+{"@type":"BlogPosting","headline":"Bite Sized Rust RE: 1 Deconstructing Hello World","dateModified":"2020-05-19T00:00:00-04:00","url":"http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html","datePublished":"2020-05-19T00:00:00-04:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html"},"description":"Bite Sized Rust RE: 1 Deconstructing Hello World","@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="wolfshirtz" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">wolfshirtz</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/about/">About</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Bite Sized Rust RE: 1 Deconstructing Hello World</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2020-05-19T00:00:00-04:00" itemprop="datePublished">May 19, 2020
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <h1 id="bite-sized-rust-re-1-deconstructing-hello-world">Bite Sized Rust RE: 1 Deconstructing Hello World</h1>
+
+<p>In this tutorial series I am going to attempt to introduce ways of reverse engineering programs that were written in the rust programming language
+and to explain concepts in bite sized morsals. This means most example code in each tutorial will normally only consist of one to two functions that are program specific.</p>
+
+<p>This is not a rust tutorial, that being said you don’t have to be fluent in rust to understand most of these code examples.
+I would recommend reading <a href="https://doc.rust-lang.org/book/">the book</a> either before or alongside these tutorials.</p>
+
+<p>I also assume that you have basic shell knowladge (IE you know how to create files and directories as well as how to navigate them) and
+that you are <del>fairly</del> somewhat comfortable with reversing code written in C.</p>
+
+<p>On a quick note I am currently compiling on x64 linux; with that said lets get started.</p>
+
+<h2 id="hello-world">Hello World</h2>
+
+<p>First to start of create a project directory and naviagte into it. From there you can run <code class="highlighter-rouge">cargo init</code>
+which is kind enough to create a <code class="highlighter-rouge">src</code> directory with a <code class="highlighter-rouge">main.rs</code> that acts as a hello world example.</p>
+
+<figure class="highlight"><pre><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nd">println!</span><span class="p">(</span><span class="s">"Hello, world!"</span><span class="p">);</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Compile this with <code class="highlighter-rouge">cargo build</code> and cargo will build your program and store it under <code class="highlighter-rouge">target/debug/</code>.
+This can be run like any other program. Congrats you have a hello world.</p>
+
+<h2 id="disecting">Disecting</h2>
+
+<p>Just rust’s hello world shows us how a few code patterns end up looking when compiled in rust.
+Namely how the program deals with entry points, functions, and macros.</p>
+
+<h3 id="entry">Entry</h3>
+
+<p>First off I am going to open the binary up with radare2 and run <code class="highlighter-rouge">aaa</code> on it to do some basic analysis.
+Then since cargo’s debug build has symbols we can just search for a main function by running <code class="highlighter-rouge">afl~main</code>.</p>
+
+<p>In the case of my program it returns the following</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0x00004350    1 55           sym.rev::main::hf8bea8ba77115bd1
+0x00004390    1 47           main
+</code></pre></div></div>
+
+<p>Not I also searched for <code class="highlighter-rouge">entry</code> which is nearly identical to a normal libc entry point</p>
+
+<p>Lets look at the disassembly of the plain main function (Taken from r2 using pdb).</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/ 47: int main (int argc, char **argv, char **envp);
+|           ; var int32_t var_fh @ rsp+0xf
+|           ; var char **var_10h @ rsp+0x10
+|           ; arg int argc @ rdi
+|           ; arg char **argv @ rsi
+|           ; DATA XREF from entry0 @ 0x4171
+|           0x00004390      4883ec18       sub rsp, 0x18
+|           0x00004394      8a05c65a0200   mov al, byte [obj.__rustc_debug_gdb_scripts_section] ; [0x29e60:1]=1
+|           0x0000439a      4863cf         movsxd rcx, edi             ; argc
+|           0x0000439d      488d3dacffff.  lea rdi, [sym.rev::main::hf8bea8ba77115bd1] ; 0x4350 ; "H\x83\xec8H\x8d\x05m\xdd\x02"
+|           0x000043a4      4889742410     mov qword [var_10h], rsi    ; argv
+|           0x000043a9      4889ce         mov rsi, rcx
+|           0x000043ac      488b542410     mov rdx, qword [var_10h]
+|           0x000043b1      8844240f       mov byte [var_fh], al
+|           0x000043b5      e886feffff     call sym std::rt::lang_start::h328d8a166e8eb4ab ; sym.std::rt::lang_start::h328d8a166e8eb4ab
+|           0x000043ba      4883c418       add rsp, 0x18
+\           0x000043be      c3             ret
+
+</code></pre></div></div>
+
+<p>What we see is a fairly simple function that loads a pointer to the other main function into <code class="highlighter-rouge">rdi</code> and passes that as an argument to <code class="highlighter-rouge">std::rt::lang_start</code>.
+This function initializes the rust runtime and calls are true main function.</p>
+
+<h3 id="functions">functions</h3>
+<p>From our previous example we already know that rust uses fastcall as its calling convention (It pass arguments to functions through registers instead of on the stack).
+Now that we know about the calling convetion lets break down or real main function.</p>
+
+<p>Here is the real main functions disassembly.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/ 55: sym.rev::main::hf8bea8ba77115bd1 ();
+|           ; var int32_t var_8h @ rsp+0x8
+|           ; DATA XREF from main @ 0x439d
+|           0x00004350      4883ec38       sub rsp, 0x38               ; .//src:1
+|           0x00004354      488d056ddd02.  lea rax, [0x000320c8]
+|           0x0000435b      31c9           xor ecx, ecx
+|           0x0000435d      4189c8         mov r8d, ecx
+|           0x00004360      488d7c2408     lea rdi, [var_8h]
+|           0x00004365      4889c6         mov rsi, rax
+|           0x00004368      ba01000000     mov edx, 1
+|           0x0000436d      b908000000     mov ecx, 8
+|           0x00004372      e889000000     call sym core::fmt::Arguments::new_v1::h3203dc4013591ae6 ; .//src:237 ; sym.core::fmt::Arguments::new_v1::h3203dc4013591ae6
+|           0x00004377      488d7c2408     lea rdi, [var_8h]
+|           0x0000437c      ff154ef90200   call qword [sym.std::io::stdio::_print::h74e13de89e94daa3] ; [0x33cd0:8]=0x7f50 sym.std::io::stdio::_print::h74e13de89e94daa3
+|           0x00004382      4883c438       add rsp, 0x38
+\           0x00004386      c3             ret
+</code></pre></div></div>
+
+<p>Just like in c rust creates a stack frame and cleans it up at the begining and end of the function. 
+Also unlike our source code we see two functions calls one to <code class="highlighter-rouge">core::fmt::Arguments</code> and another to <code class="highlighter-rouge">std::io::_print</code>. This is because <code class="highlighter-rouge">println!</code> as many already
+know is a macro in rust. Before I address macros I will quickly explain the functions <code class="highlighter-rouge">core::fmt::Arguments</code> is a precompiled format string and <code class="highlighter-rouge">std::io::_print</code> is a generic print.</p>
+
+<p>Also as a note because radare didn’t pick it up the data at <code class="highlighter-rouge">0x000320c8</code> that is loaded into rax is the address of “Hello, world”. This can be figured out
+by using <code class="highlighter-rouge">s 0x000320c8</code> in combination with visual mode to view what is at that address.</p>
+
+<h3 id="macros">Macros</h3>
+<p>Previously I quickly mentioned macros and without going into explaing metaprogramming I will try and provide some context for the non macro savy.
+Put simply macros are ways in which a programer can define code that acts and is called like a function, but when the compiler actually compiles the program it runs through and looks for macros 
+and then expands them into the source code and proceeds with compiling. This is very useful if you have a certain bit of code you are writting out a lot, but is two short to deserve being put into a function.
+Macros can also be used for things like adding new syntax.</p>
+
+<p>In short you don’t have to learn “new” concepts per say when you are reversing code that utilizes macros, but it is nice to understand what macros are and that they get expanded at compile time because 
+of how heavily used macros are in rust.</p>
+
+<h2 id="closing">Closing</h2>
+<p>As a quick recap we learned about how rust gets to executing main, the calling convention that rust uses, and why understanding macro expansion is important.</p>
+
+<p>Thanks for reading happy hacking - wolfshirtz</p>
+
+<h2 id="tool-links">Tool Links</h2>
+<p><a href="https://rada.re/n/">radare2</a>
+<a href="https://www.rust-lang.org/learn/get-started">rust/cargo</a></p>
+
+<h2 id="useful-links">Useful links</h2>
+<p><a href="https://doc.rust-lang.org/beta/std/index.html">rust docs</a>
+<a href="https://doc.rust-lang.org/book/">rust book</a>
+<a href="https://github.com/radareorg/radare2/blob/master/doc/intro.md">radare2 cheat sheet</a></p>
+
+  </div><a class="u-url" href="/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">wolfshirtz</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">wolfshirtz</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/RayofLightz"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">RayofLightz</span></a></li><li><a href="https://www.twitter.com/wolfshirtz"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">wolfshirtz</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,4 +1,124 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-02-12T21:41:05-05:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Malware Safari: Reversing A Powershell Dropper</title><link href="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html" rel="alternate" type="text/html" title="Malware Safari: Reversing A Powershell Dropper" /><published>2020-02-12T00:00:00-05:00</published><updated>2020-02-12T00:00:00-05:00</updated><id>http://localhost:4000/malware/re/2020/02/12/Malware-Safari:-Reversing-A-Powershell-Dropper</id><content type="html" xml:base="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html">&lt;h1 id=&quot;malware-safari-reversing-a-powershell-dropper&quot;&gt;Malware Safari: Reversing A Powershell Dropper&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-05-19T14:09:06-04:00</updated><id>http://localhost:4000/</id><title type="html">wolfshirtz</title><subtitle>The personal blog of Tristan Messner(@wolfshirtz). I will mostly talk about information security and  software development. I am an information security student who is looking to become a red teamer or security researcher. I love a good cup of coffee and making things.</subtitle><entry><title type="html">Bite Sized Rust RE: 1 Deconstructing Hello World</title><link href="http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html" rel="alternate" type="text/html" title="Bite Sized Rust RE: 1 Deconstructing Hello World" /><published>2020-05-19T00:00:00-04:00</published><updated>2020-05-19T00:00:00-04:00</updated><id>http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE:-1-Deconstructing-Hello-World</id><content type="html" xml:base="http://localhost:4000/re/rust/2020/05/19/Bite-Sized-Rust-RE-1-Deconstructing-Hello-World.html">&lt;h1 id=&quot;bite-sized-rust-re-1-deconstructing-hello-world&quot;&gt;Bite Sized Rust RE: 1 Deconstructing Hello World&lt;/h1&gt;
+
+&lt;p&gt;In this tutorial series I am going to attempt to introduce ways of reverse engineering programs that were written in the rust programming language
+and to explain concepts in bite sized morsals. This means most example code in each tutorial will normally only consist of one to two functions that are program specific.&lt;/p&gt;
+
+&lt;p&gt;This is not a rust tutorial, that being said you don’t have to be fluent in rust to understand most of these code examples.
+I would recommend reading &lt;a href=&quot;https://doc.rust-lang.org/book/&quot;&gt;the book&lt;/a&gt; either before or alongside these tutorials.&lt;/p&gt;
+
+&lt;p&gt;I also assume that you have basic shell knowladge (IE you know how to create files and directories as well as how to navigate them) and
+that you are &lt;del&gt;fairly&lt;/del&gt; somewhat comfortable with reversing code written in C.&lt;/p&gt;
+
+&lt;p&gt;On a quick note I am currently compiling on x64 linux; with that said lets get started.&lt;/p&gt;
+
+&lt;h2 id=&quot;hello-world&quot;&gt;Hello World&lt;/h2&gt;
+
+&lt;p&gt;First to start of create a project directory and naviagte into it. From there you can run &lt;code class=&quot;highlighter-rouge&quot;&gt;cargo init&lt;/code&gt;
+which is kind enough to create a &lt;code class=&quot;highlighter-rouge&quot;&gt;src&lt;/code&gt; directory with a &lt;code class=&quot;highlighter-rouge&quot;&gt;main.rs&lt;/code&gt; that acts as a hello world example.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;k&quot;&gt;fn&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nd&quot;&gt;println!&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello, world!&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Compile this with &lt;code class=&quot;highlighter-rouge&quot;&gt;cargo build&lt;/code&gt; and cargo will build your program and store it under &lt;code class=&quot;highlighter-rouge&quot;&gt;target/debug/&lt;/code&gt;.
+This can be run like any other program. Congrats you have a hello world.&lt;/p&gt;
+
+&lt;h2 id=&quot;disecting&quot;&gt;Disecting&lt;/h2&gt;
+
+&lt;p&gt;Just rust’s hello world shows us how a few code patterns end up looking when compiled in rust.
+Namely how the program deals with entry points, functions, and macros.&lt;/p&gt;
+
+&lt;h3 id=&quot;entry&quot;&gt;Entry&lt;/h3&gt;
+
+&lt;p&gt;First off I am going to open the binary up with radare2 and run &lt;code class=&quot;highlighter-rouge&quot;&gt;aaa&lt;/code&gt; on it to do some basic analysis.
+Then since cargo’s debug build has symbols we can just search for a main function by running &lt;code class=&quot;highlighter-rouge&quot;&gt;afl~main&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;In the case of my program it returns the following&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;0x00004350    1 55           sym.rev::main::hf8bea8ba77115bd1
+0x00004390    1 47           main
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Not I also searched for &lt;code class=&quot;highlighter-rouge&quot;&gt;entry&lt;/code&gt; which is nearly identical to a normal libc entry point&lt;/p&gt;
+
+&lt;p&gt;Lets look at the disassembly of the plain main function (Taken from r2 using pdb).&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/ 47: int main (int argc, char **argv, char **envp);
+|           ; var int32_t var_fh @ rsp+0xf
+|           ; var char **var_10h @ rsp+0x10
+|           ; arg int argc @ rdi
+|           ; arg char **argv @ rsi
+|           ; DATA XREF from entry0 @ 0x4171
+|           0x00004390      4883ec18       sub rsp, 0x18
+|           0x00004394      8a05c65a0200   mov al, byte [obj.__rustc_debug_gdb_scripts_section] ; [0x29e60:1]=1
+|           0x0000439a      4863cf         movsxd rcx, edi             ; argc
+|           0x0000439d      488d3dacffff.  lea rdi, [sym.rev::main::hf8bea8ba77115bd1] ; 0x4350 ; &quot;H\x83\xec8H\x8d\x05m\xdd\x02&quot;
+|           0x000043a4      4889742410     mov qword [var_10h], rsi    ; argv
+|           0x000043a9      4889ce         mov rsi, rcx
+|           0x000043ac      488b542410     mov rdx, qword [var_10h]
+|           0x000043b1      8844240f       mov byte [var_fh], al
+|           0x000043b5      e886feffff     call sym std::rt::lang_start::h328d8a166e8eb4ab ; sym.std::rt::lang_start::h328d8a166e8eb4ab
+|           0x000043ba      4883c418       add rsp, 0x18
+\           0x000043be      c3             ret
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;What we see is a fairly simple function that loads a pointer to the other main function into &lt;code class=&quot;highlighter-rouge&quot;&gt;rdi&lt;/code&gt; and passes that as an argument to &lt;code class=&quot;highlighter-rouge&quot;&gt;std::rt::lang_start&lt;/code&gt;.
+This function initializes the rust runtime and calls are true main function.&lt;/p&gt;
+
+&lt;h3 id=&quot;functions&quot;&gt;functions&lt;/h3&gt;
+&lt;p&gt;From our previous example we already know that rust uses fastcall as its calling convention (It pass arguments to functions through registers instead of on the stack).
+Now that we know about the calling convetion lets break down or real main function.&lt;/p&gt;
+
+&lt;p&gt;Here is the real main functions disassembly.&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/ 55: sym.rev::main::hf8bea8ba77115bd1 ();
+|           ; var int32_t var_8h @ rsp+0x8
+|           ; DATA XREF from main @ 0x439d
+|           0x00004350      4883ec38       sub rsp, 0x38               ; .//src:1
+|           0x00004354      488d056ddd02.  lea rax, [0x000320c8]
+|           0x0000435b      31c9           xor ecx, ecx
+|           0x0000435d      4189c8         mov r8d, ecx
+|           0x00004360      488d7c2408     lea rdi, [var_8h]
+|           0x00004365      4889c6         mov rsi, rax
+|           0x00004368      ba01000000     mov edx, 1
+|           0x0000436d      b908000000     mov ecx, 8
+|           0x00004372      e889000000     call sym core::fmt::Arguments::new_v1::h3203dc4013591ae6 ; .//src:237 ; sym.core::fmt::Arguments::new_v1::h3203dc4013591ae6
+|           0x00004377      488d7c2408     lea rdi, [var_8h]
+|           0x0000437c      ff154ef90200   call qword [sym.std::io::stdio::_print::h74e13de89e94daa3] ; [0x33cd0:8]=0x7f50 sym.std::io::stdio::_print::h74e13de89e94daa3
+|           0x00004382      4883c438       add rsp, 0x38
+\           0x00004386      c3             ret
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Just like in c rust creates a stack frame and cleans it up at the begining and end of the function. 
+Also unlike our source code we see two functions calls one to &lt;code class=&quot;highlighter-rouge&quot;&gt;core::fmt::Arguments&lt;/code&gt; and another to &lt;code class=&quot;highlighter-rouge&quot;&gt;std::io::_print&lt;/code&gt;. This is because &lt;code class=&quot;highlighter-rouge&quot;&gt;println!&lt;/code&gt; as many already
+know is a macro in rust. Before I address macros I will quickly explain the functions &lt;code class=&quot;highlighter-rouge&quot;&gt;core::fmt::Arguments&lt;/code&gt; is a precompiled format string and &lt;code class=&quot;highlighter-rouge&quot;&gt;std::io::_print&lt;/code&gt; is a generic print.&lt;/p&gt;
+
+&lt;p&gt;Also as a note because radare didn’t pick it up the data at &lt;code class=&quot;highlighter-rouge&quot;&gt;0x000320c8&lt;/code&gt; that is loaded into rax is the address of “Hello, world”. This can be figured out
+by using &lt;code class=&quot;highlighter-rouge&quot;&gt;s 0x000320c8&lt;/code&gt; in combination with visual mode to view what is at that address.&lt;/p&gt;
+
+&lt;h3 id=&quot;macros&quot;&gt;Macros&lt;/h3&gt;
+&lt;p&gt;Previously I quickly mentioned macros and without going into explaing metaprogramming I will try and provide some context for the non macro savy.
+Put simply macros are ways in which a programer can define code that acts and is called like a function, but when the compiler actually compiles the program it runs through and looks for macros 
+and then expands them into the source code and proceeds with compiling. This is very useful if you have a certain bit of code you are writting out a lot, but is two short to deserve being put into a function.
+Macros can also be used for things like adding new syntax.&lt;/p&gt;
+
+&lt;p&gt;In short you don’t have to learn “new” concepts per say when you are reversing code that utilizes macros, but it is nice to understand what macros are and that they get expanded at compile time because 
+of how heavily used macros are in rust.&lt;/p&gt;
+
+&lt;h2 id=&quot;closing&quot;&gt;Closing&lt;/h2&gt;
+&lt;p&gt;As a quick recap we learned about how rust gets to executing main, the calling convention that rust uses, and why understanding macro expansion is important.&lt;/p&gt;
+
+&lt;p&gt;Thanks for reading happy hacking - wolfshirtz&lt;/p&gt;
+
+&lt;h2 id=&quot;tool-links&quot;&gt;Tool Links&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://rada.re/n/&quot;&gt;radare2&lt;/a&gt;
+&lt;a href=&quot;https://www.rust-lang.org/learn/get-started&quot;&gt;rust/cargo&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;useful-links&quot;&gt;Useful links&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&quot;https://doc.rust-lang.org/beta/std/index.html&quot;&gt;rust docs&lt;/a&gt;
+&lt;a href=&quot;https://doc.rust-lang.org/book/&quot;&gt;rust book&lt;/a&gt;
+&lt;a href=&quot;https://github.com/radareorg/radare2/blob/master/doc/intro.md&quot;&gt;radare2 cheat sheet&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><summary type="html">Bite Sized Rust RE: 1 Deconstructing Hello World</summary></entry><entry><title type="html">Malware Safari: Reversing A Powershell Dropper</title><link href="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html" rel="alternate" type="text/html" title="Malware Safari: Reversing A Powershell Dropper" /><published>2020-02-12T00:00:00-05:00</published><updated>2020-02-12T00:00:00-05:00</updated><id>http://localhost:4000/malware/re/2020/02/12/Malware-Safari:-Reversing-A-Powershell-Dropper</id><content type="html" xml:base="http://localhost:4000/malware/re/2020/02/12/Malware-Safari-Reversing-A-Powershell-Dropper.html">&lt;h1 id=&quot;malware-safari-reversing-a-powershell-dropper&quot;&gt;Malware Safari: Reversing A Powershell Dropper&lt;/h1&gt;
 &lt;p&gt;Recently I was reading a twitter thread by &lt;a href=&quot;https://twitter.com/_mbanana/status/1225570787475804160&quot;&gt;@_mbanana&lt;/a&gt; about malware analysis and saw the website malshare mentioned.
 To make a long story short I signed up for an api key and the first sample I saw had a powershell label. I decided to look into it
 and found a powershell dropper.&lt;/p&gt;
